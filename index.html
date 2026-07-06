@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teya — Enter amount (walkthrough)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#F2F3E9; --ink:#090806; --amt:#29320C; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:var(--bg); font-family:'Figtree',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased; }
+  body{ display:flex; flex-direction:column; align-items:center; overflow:hidden; }
+
+  /* scene tabs — top chrome, kept small so it stays outside the recording crop */
+  .tabs{ display:flex; gap:6px; padding:14px 0 10px; }
+  .tab{ font:inherit; font-size:13px; font-weight:600; letter-spacing:.01em; color:rgba(9,8,6,.55);
+    background:rgba(95,79,48,.06); border:none; border-radius:99px; padding:7px 18px; cursor:pointer;
+    transition:background .18s ease, color .18s ease; }
+  .tab:hover{ background:rgba(95,79,48,.1); }
+  .tab.active{ background:#151513; color:#fff; }
+
+  /* stage keeps the active scene centred below the tabs */
+  .stage{ flex:1; min-height:0; width:100%; display:flex; align-items:center; justify-content:center;
+    padding-bottom:14px; }
+  .scene.hidden{ display:none; }
+
+  /* the terminal screen (360×800), scaled to fit the stage height */
+  /* no overflow:hidden here — it was clipping the dropdown's soft shadow at the screen edge;
+     body shares the same bg colour so letting the shadow bleed out is invisible */
+  .screen{ position:relative; height:100%; aspect-ratio:360/800; background:var(--bg);
+    container-type:size; }
+
+  /* ---- payment scene: the site's "New payment experience" card, fixed 328×371 ---- */
+  .pay-widget{ width:328px; height:371px; position:relative; overflow:hidden;
+    border-radius:18px; background:#FCFBFA; }
+  /* phone screen 393×852 framed exactly like the site's scaleJelly:
+     s = 328/393 = .834606 · translateY(-150·s) = -125.19px · stack centre = 150 + (371/s)/2 = 372.26px */
+  .pay-stage{ position:absolute; top:0; left:50%; width:393px; height:852px;
+    transform-origin:top center; transform:translateX(-50%) translateY(-125.19px) scale(.834606); }
+  .globe2{ position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; }
+  .nfc-stack2{ position:absolute; top:372.26px; left:50%; transform:translate(-50%,-50%); z-index:5;
+    display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; pointer-events:none; }
+  .nfc-icon2{ z-index:5; line-height:0; }
+  .instruction2{ text-align:center; z-index:5; font-size:18px; font-weight:500; color:#1A1A1A;
+    line-height:1.45; width:260px; letter-spacing:-.01em; }
+  .price-container2{ z-index:5; text-align:center; }
+  .price2{ font-size:72px; font-weight:600; color:#1A1A1A; letter-spacing:-2px; position:relative;
+    display:inline-block; line-height:1; }
+  .price-shimmer2{ position:relative; display:inline-block; }
+  .price-shimmer2 .price2{
+    background:linear-gradient(105deg, #1A1A1A 0%, #1A1A1A 40%, #EFFF53 50%, #1A1A1A 60%, #1A1A1A 100%);
+    background-size:300% 100%; background-position:100% 0;
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    animation:shimmer2 3.6s ease-in-out infinite; }
+  @keyframes shimmer2{ 0%{background-position:100% 0} 50%{background-position:0% 0} 100%{background-position:0% 0} }
+
+  /* ---- quick actions scene: the site's qa card at fixed 328×371 (styles copied verbatim) ---- */
+  .qa-widget{ width:328px; height:371px; border-radius:18px; background:#FCFBFA; position:relative;
+    overflow:hidden; container-type:inline-size; display:flex; flex-direction:column; }
+  .qa-screen{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; }
+  .qa-amount{ display:flex; align-items:baseline; font-weight:600; letter-spacing:-.02em;
+    font-size:15cqi; line-height:1; }
+  .qa-cur{ color:#29320C; }
+  .qa-val{ color:rgba(41,50,12,.2); transition:color .3s ease; font-variant-numeric:tabular-nums; }
+  .qa-amount.entered .qa-val{ color:#14130F; }
+  .qa-actions{ padding:0 5cqi 6cqi; }
+  .qa-label{ font-size:3.2cqi; font-weight:600; letter-spacing:.15em; text-transform:uppercase;
+    color:rgba(33,28,18,.4); margin-bottom:3cqi; }
+  .qa-row{ display:flex; gap:1.8cqi; }
+  .qa-pill{ font:inherit; font-size:3.9cqi; font-weight:500; line-height:1; color:rgba(9,8,6,.925);
+    background:rgba(95,79,48,.05); border:none; border-radius:99px; padding:3.3cqi 3.8cqi;
+    display:flex; align-items:center; gap:1.3cqi; white-space:nowrap; cursor:pointer;
+    transition:translate .5s cubic-bezier(.3,.75,.25,1), scale .18s ease, rotate .16s ease,
+               background .15s ease, box-shadow .22s ease; }
+  .qa-pill svg{ width:1.3em; height:1.3em; display:block; margin-block:-0.15em; }
+  .qa-pill-round{ padding:3.3cqi; color:rgba(22,20,14,.55); }
+  .qa-pill.pressed,.qa-pill:active{ scale:.92; background:rgba(95,79,48,.14); }
+  .qa-pill.noanim{ transition:none; }
+  @keyframes qa-jiggle{ 0%{rotate:-2.6deg} 50%{rotate:2.6deg} 100%{rotate:-2.6deg} }
+  .qa-pill.lifted{ scale:1.09; z-index:6; background:#fff;
+    box-shadow:0 10px 24px rgba(20,18,12,.20), 0 2px 6px rgba(20,18,12,.10);
+    animation:qa-jiggle .22s linear infinite; }
+
+  /* actions list panel — slides in over the amount view */
+  .qa-panel{ position:absolute; inset:0; z-index:10; background:#FCFBFA; padding:3.4cqi 5.5cqi;
+    transform:translateX(105%); transition:transform .6s cubic-bezier(.3,.85,.25,1); }
+  .qa-panel.in{ transform:translateX(0); }
+  .qas-row{ display:flex; align-items:flex-start; gap:3.7cqi; padding:4.4cqi 0;
+    opacity:0; translate:0 3cqi;
+    transition:opacity .45s ease, translate .5s cubic-bezier(.25,.8,.3,1); }   /* staggered entrance */
+  .qas-row.in{ opacity:1; translate:0 0; }
+  .qas-row ~ .qas-row{ border-top:1px solid rgba(49,58,49,.08); }
+  .qas-ic{ width:6.1cqi; height:6.1cqi; flex:0 0 auto; display:flex; margin-top:.4cqi; }
+  .qas-ic svg{ width:100%; height:100%; }
+  .qas-txt{ flex:1; min-width:0; }
+  .qas-title{ font-size:4.9cqi; font-weight:500; color:rgba(9,8,6,.925); line-height:1.3; }
+  .qas-sub{ font-size:4.1cqi; color:rgba(33,28,18,.45); line-height:1.4; margin-top:.8cqi; }
+  .qas-toggle{ width:13.6cqi; height:7.2cqi; border-radius:99px; background:#E7E6DF; flex:0 0 auto;
+    position:relative; margin-left:auto; margin-top:.4cqi; transition:background .3s ease; }
+  .qas-knob{ position:absolute; top:.7cqi; left:.7cqi; width:5.8cqi; height:5.8cqi; border-radius:50%;
+    background:#fff; box-shadow:0 1px 2.5px rgba(0,0,0,.2);
+    transition:translate .3s cubic-bezier(.3,.85,.3,1); }
+  .qas-toggle.on{ background:#46520F; }
+  .qas-toggle.on .qas-knob{ translate:6.4cqi 0; }
+  /* quick amounts list — revealed when the toggle turns on */
+  .qas-amounts{ display:flex; flex-direction:column; gap:3.2cqi; overflow:hidden;
+    max-height:0; opacity:0; margin:0;
+    transition:max-height .55s cubic-bezier(.25,.8,.25,1), opacity .4s ease,
+               margin .55s cubic-bezier(.25,.8,.25,1); }
+  .qas-amounts.on{ max-height:80cqi; opacity:1; margin:.6cqi 0 4cqi; }
+  .qas-amt-row{ display:flex; gap:3.2cqi; align-items:stretch; }
+  .qas-field{ flex:1; display:flex; align-items:center; font-size:4.9cqi; color:rgba(9,8,6,.925);
+    background:#fff; border:1px solid rgba(0,0,0,.1); border-radius:3.6cqi; padding:3.4cqi 4.3cqi; }
+  .qas-del{ width:12.8cqi; flex:0 0 auto; border:none; border-radius:3.6cqi; background:#F6F5F0;
+    display:flex; align-items:center; justify-content:center; padding:0; }
+  .qas-del svg{ width:5.5cqi; height:5.5cqi; }
+  .qas-addnew{ align-self:center; display:flex; align-items:center; gap:1.6cqi; border:none;
+    background:none; font:inherit; font-size:4.6cqi; font-weight:600; color:rgba(9,8,6,.925);
+    padding:1.4cqi 2cqi; }
+  .qas-addnew svg{ width:5cqi; height:5cqi; }
+
+  /* white keypad card */
+  .card{ position:absolute; left:10.8cqw; top:22cqh; width:78.2cqw; height:auto; aspect-ratio:281/430;
+    background:#fff; border-radius:4.4cqw; container-type:inline-size;
+    box-shadow:0 1.7cqw 3.9cqw -1cqw rgba(0,0,0,.05), 0 4.3cqw 9.7cqw -3cqw rgba(0,0,0,.06);
+    display:flex; flex-direction:column; padding:5.5cqi 5.5cqi 6cqi; }
+
+  .kp-top{ display:flex; justify-content:space-between; }
+  .kp-btn{ width:11.1cqi; height:11.1cqi; border-radius:50%; border:none; padding:0;
+    background:rgba(95,79,48,.05); color:rgba(9,8,6,.925);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:transform .14s ease, background .14s ease; }
+  .kp-btn svg{ width:5.6cqi; height:5.6cqi; }
+  .kp-btn.pressed{ transform:scale(.9); background:rgba(95,79,48,.12); }
+
+  .kp-amount{ display:flex; align-items:baseline; justify-content:center; gap:.4cqi;
+    font-weight:700; letter-spacing:-.03em; font-size:23cqi; line-height:1;
+    margin:auto 0; }               /* vertically centred between top row and pad */
+  .kp-cur{ color:var(--amt); font-size:.82em; }
+  .kp-val{ color:var(--amt); opacity:.2; transition:opacity .25s ease; font-variant-numeric:tabular-nums; }
+  .kp-amount.entered .kp-val{ opacity:1; }
+
+  .kp-pad{ display:grid; grid-template-columns:repeat(3,1fr); gap:3.6cqi 4.2cqi; }
+  .key{ position:relative; aspect-ratio:60/56; border:none; background:transparent; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font:inherit; font-size:9.4cqi; font-weight:500; color:rgba(9,8,6,.925);
+    border-radius:4.4cqi; transition:transform .12s ease, background .12s ease; }
+  .key svg{ width:8.4cqi; height:8.4cqi; }
+  .key.pressed{ background:rgba(95,79,48,.08); transform:scale(.9); }
+
+  /* calculator dropdown — frosted glass, OUTSIDE the card (child of .screen), overflowing right */
+  .kp-menu{ position:absolute; top:24cqh; left:31cqw; right:5cqw; z-index:40;
+    background:rgba(250,250,247,.72);
+    -webkit-backdrop-filter:blur(16px) saturate(1.6); backdrop-filter:blur(16px) saturate(1.6);
+    border:1px solid rgba(255,255,255,.6); border-radius:4.6cqw; overflow:hidden; transform-origin:top right;
+    box-shadow:0 1.8cqw 5cqw -1cqw rgba(20,18,12,.14), 0 5.5cqw 14cqw -3cqw rgba(20,18,12,.2);
+    opacity:0; transform:translateY(-2.4cqw) scale(.9); pointer-events:none;
+    transition:transform .34s cubic-bezier(.4,0,.55,1), opacity .26s ease; }   /* graceful collapse */
+  .kp-menu.open{ opacity:1; transform:translateY(0) scale(1);
+    transition:transform .52s cubic-bezier(.2,1.34,.3,1), opacity .3s ease; }   /* elastic open */
+  .kp-item{ display:flex; align-items:center; gap:3.1cqw; padding:3.6cqw 4.3cqw; position:relative; }
+  .kp-item + .kp-item::before{ content:''; position:absolute; top:0; left:4.3cqw; right:4.3cqw;
+    height:1px; background:rgba(49,58,49,.13); }   /* divider inset to the item padding */
+  .kp-item .ic{ width:5cqw; height:5cqw; color:rgba(22,20,14,.6); flex:0 0 auto; display:flex; }
+  .kp-item .ic svg{ width:100%; height:100%; }
+  .kp-item .lbl{ font-size:4.2cqw; font-weight:500; color:rgba(9,8,6,.82); flex:1; white-space:nowrap; }
+  .kp-item .chk{ width:4.4cqw; height:4.4cqw; color:rgba(22,20,14,.6); flex:0 0 auto; }
+</style></head>
+<body>
+<nav class="tabs">
+  <button class="tab active" data-scene="amount">Amount</button>
+  <button class="tab" data-scene="payment">Payment</button>
+  <button class="tab" data-scene="quick">Quick actions</button>
+</nav>
+<div class="stage">
+<div class="screen scene" id="screen" data-scene="amount">
+  <div class="card" id="card">
+    <div class="kp-top">
+      <button class="kp-btn" id="btnLeft" aria-label="Teya"><svg viewBox="7 7 17 17" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.0492 9.77295H12.218C10.8677 9.77295 9.77271 10.868 9.77271 12.2184V19.0548C9.77271 20.4052 10.8677 21.5002 12.218 21.5002H19.0544C20.4047 21.5002 21.5 20.4052 21.5 19.0548V12.2184C21.4945 10.868 20.3995 9.77295 19.0492 9.77295ZM19.0443 14.7406C17.6977 14.7406 16.6085 15.8251 16.6085 17.1544V18.4992H14.5539V17.1544C14.5539 16.0805 14.94 15.0916 15.5786 14.3208C16.4048 13.3319 17.6493 12.7048 19.0443 12.7048V14.7406ZM12.1182 12.7098V14.7406C12.9443 14.7406 13.6741 15.1499 14.1194 15.7718C14.3179 15.0649 14.6721 14.4164 15.1441 13.8687C14.3446 13.151 13.2824 12.7098 12.1182 12.7098Z"/></svg></button>
+      <button class="kp-btn" id="btnMenu" aria-label="Calculator"><svg viewBox="7 7 17 17" fill="currentColor"><path d="M14.1703 17.917C14.62 17.917 14.9847 18.2817 14.9847 18.7314C14.9847 19.1812 14.62 19.5458 14.1703 19.5458C13.7205 19.5458 13.3559 19.1812 13.3559 18.7314C13.3559 18.2817 13.7205 17.917 14.1703 17.917Z"/><path d="M17.1021 17.917C17.5518 17.917 17.9165 18.2817 17.9165 18.7314C17.9165 19.1812 17.5518 19.5458 17.1021 19.5458C16.6524 19.5458 16.2877 19.1812 16.2877 18.7314C16.2877 18.2817 16.6524 17.917 17.1021 17.917Z"/><path d="M14.1703 14.9852C14.62 14.9852 14.9847 15.3499 14.9847 15.7996C14.9847 16.2494 14.62 16.614 14.1703 16.614C13.7205 16.614 13.3559 16.2493 13.3559 15.7996C13.3559 15.3499 13.7205 14.9852 14.1703 14.9852Z"/><path d="M17.1021 14.9852C17.5518 14.9852 17.9165 15.3499 17.9165 15.7996C17.9165 16.2494 17.5518 16.614 17.1021 16.614C16.6524 16.614 16.2877 16.2494 16.2877 15.7996C16.2877 15.3499 16.6524 14.9852 17.1021 14.9852Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18.2423 9.12158C19.6816 9.12158 20.8483 10.2884 20.8483 11.7276V19.5458C20.8483 20.9851 19.6816 22.1519 18.2423 22.1519H13.0301C11.5909 22.1519 10.4241 20.9852 10.4241 19.5458V11.7276C10.4241 10.2884 11.5908 9.12158 13.0301 9.12158H18.2423ZM11.7271 19.5458C11.7271 20.2655 12.3105 20.8489 13.0301 20.8489H18.2423C18.9619 20.8489 19.5453 20.2655 19.5453 19.5458V13.6822H11.7271V19.5458ZM13.0301 10.4246C12.3105 10.4246 11.7271 11.008 11.7271 11.7276V12.3792H19.5453V11.7276C19.5453 11.008 18.9619 10.4246 18.2423 10.4246H13.0301Z"/></svg></button>
+    </div>
+
+    <div class="kp-amount" id="amount"><span class="kp-cur">£</span><span class="kp-val" id="val">0.00</span></div>
+
+    <div class="kp-pad" id="pad">
+      <button class="key" data-k="1">1</button>
+      <button class="key" data-k="2">2</button>
+      <button class="key" data-k="3">3</button>
+      <button class="key" data-k="4">4</button>
+      <button class="key" data-k="5">5</button>
+      <button class="key" data-k="6">6</button>
+      <button class="key" data-k="7">7</button>
+      <button class="key" data-k="8">8</button>
+      <button class="key" data-k="9">9</button>
+      <button class="key" data-k="00">00</button>
+      <button class="key" data-k="0">0</button>
+      <button class="key" data-k="del" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5H9.2c-.5 0-1 .22-1.34.6l-4 5c-.3.37-.3.9 0 1.28l4 5c.34.38.84.62 1.34.62H20a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 20 6.5Z"/><path d="M12.5 10.5l4 4M16.5 10.5l-4 4"/></svg></button>
+    </div>
+  </div>
+
+  <div class="kp-menu" id="menu">
+    <div class="kp-item">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="M8 7.5h8" stroke-linecap="round"/><circle cx="8.5" cy="12" r=".5"/><circle cx="12" cy="12" r=".5"/><circle cx="15.5" cy="12" r=".5"/><circle cx="8.5" cy="16" r=".5"/><circle cx="12" cy="16" r=".5"/><circle cx="15.5" cy="16" r=".5"/></svg></span>
+      <span class="lbl">Show calculator</span>
+      <span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+    </div>
+    <div class="kp-item">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M14 5l3 3-3 3M17 16H7M10 13l-3 3 3 3"/></svg></span>
+      <span class="lbl">Invert keypad</span>
+    </div>
+    <div class="kp-item">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/></svg></span>
+      <span class="lbl">Whole digit</span>
+    </div>
+  </div>
+</div>
+
+<div class="scene pay-scene hidden" data-scene="payment">
+  <div class="pay-widget">
+    <div class="pay-stage">
+      <canvas class="globe2" id="globe2"></canvas>
+      <div class="nfc-stack2">
+        <div class="nfc-icon2"><svg width="72" height="47" viewBox="0 0 72 47" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#nfc_clip1)">
+<path d="M30.8004 46.0199C13.8141 46.0199 0 35.6967 0 23.0099C0 10.3232 13.8141 0 30.8004 0C44.142 0 55.9031 6.34621 60.0485 15.795C60.1693 16.0688 60.1768 16.3795 60.0692 16.6588C60.0159 16.7971 59.936 16.9235 59.834 17.0308C59.732 17.1381 59.6099 17.2243 59.4748 17.2843C59.3396 17.3443 59.194 17.377 59.0462 17.3805C58.8984 17.3841 58.7514 17.3584 58.6135 17.305C58.335 17.1971 58.1107 16.9827 57.9899 16.7089C54.1989 8.0611 43.2646 2.25643 30.8004 2.25643C15.0571 2.25643 2.24985 11.5642 2.24985 23.0099C2.24985 34.4557 15.0571 43.7635 30.8004 43.7635C39.8898 43.7635 48.2368 40.7116 53.6927 35.3921C53.9067 35.1834 54.1947 35.0685 54.4932 35.0728C54.7917 35.077 55.0763 35.2 55.2844 35.4147C55.4925 35.6294 55.6071 35.9182 55.6028 36.2176C55.5986 36.5169 55.476 36.8024 55.2619 37.0111C49.3842 42.7537 40.4973 46.0199 30.8004 46.0199Z" fill="#42413E"/>
+<path d="M70.8726 35.5117C70.6814 35.5121 70.4933 35.4636 70.326 35.3708C70.1587 35.2781 70.0177 35.144 69.9164 34.9815C66.1366 28.9004 59.837 18.9326 59.0215 18.0921L58.7684 17.8382C57.8066 16.868 56.8954 15.9485 55.9167 15.9485C54.4205 15.9485 50.0783 16.3321 50.0333 16.3377C49.8856 16.3507 49.7368 16.3343 49.5953 16.2896C49.4539 16.2449 49.3226 16.1727 49.209 16.0771C49.0954 15.9815 49.0017 15.8644 48.9333 15.7324C48.8648 15.6005 48.8229 15.4564 48.81 15.3082C48.797 15.1601 48.8133 15.0108 48.8579 14.8689C48.9025 14.7271 48.9745 14.5955 49.0698 14.4815C49.1652 14.3676 49.2819 14.2736 49.4135 14.2049C49.545 14.1363 49.6887 14.0942 49.8365 14.0813C50.0164 14.0813 54.3362 13.6864 55.9167 13.6864C57.8347 13.6864 59.179 15.0459 60.3658 16.2474L60.6132 16.4957C61.8169 17.6972 70.1751 31.1117 71.8287 33.7855C71.9353 33.9565 71.9942 34.1529 71.9994 34.3545C72.0045 34.556 71.9558 34.7552 71.8582 34.9314C71.7606 35.1076 71.6176 35.2544 71.4443 35.3564C71.271 35.4585 71.0735 35.5121 70.8726 35.5117Z" fill="#42413E"/>
+<path d="M61.7682 40.0715H61.6782C60.363 39.9331 59.0901 39.5261 57.9378 38.8756C56.3743 37.9196 55.0793 36.5801 54.1749 34.9832C53.7446 34.2264 53.3939 33.4267 53.1287 32.5971C52.7856 31.6494 52.3919 30.5719 51.9194 30.1488C51.447 29.7257 49.6696 28.2986 47.7685 26.7642L44.883 24.4231C42.0314 22.1047 40.6196 20.92 40.164 20.4744C38.4766 18.7821 38.4766 16.6667 40.164 14.9631C40.8727 14.2523 42.4644 13.2707 45.1474 14.7769L57.111 21.4277L56.0198 23.4021L44.0562 16.7118C42.4532 15.8205 41.9301 16.3508 41.7557 16.5256C40.7321 17.5523 41.1933 18.3026 41.7557 18.8441C42.3182 19.3857 45.3161 21.8452 46.3004 22.6462L49.1802 24.9816C51.2782 26.6739 52.9319 28.0221 53.4156 28.4509C54.3155 29.2519 54.788 30.555 55.2436 31.8355C55.4611 32.5156 55.7436 33.173 56.0873 33.7986C56.7995 35.0775 57.8231 36.1546 59.0627 36.9294C59.9319 37.4107 60.8879 37.7137 61.875 37.8207C62.1734 37.8319 62.4551 37.9615 62.6581 38.181C62.8612 38.4006 62.969 38.692 62.9578 38.9912C62.9466 39.2904 62.8173 39.5729 62.5985 39.7766C62.3796 39.9802 62.089 40.0883 61.7907 40.0771L61.7682 40.0715Z" fill="#42413E"/>
+<path d="M48.7854 31.6463C48.026 31.7069 47.2668 31.5274 46.6143 31.1329C46.4175 30.975 45.7763 30.5237 45.0957 30.0498C43.7393 29.1564 42.4359 28.1845 41.1922 27.139C40.0279 25.9713 39.8254 24.4313 40.6747 23.1903C41.7434 21.6559 43.1552 21.5318 43.8189 21.701L43.2564 23.8898C43.2171 23.8898 42.919 23.8898 42.4971 24.4539C42.4184 24.5667 42.1821 24.9052 42.7615 25.4862C43.2002 25.9262 45.1801 27.3139 46.3612 28.1431C47.1768 28.7073 47.6774 29.0626 47.9361 29.2714C48.9128 29.3747 49.8995 29.3252 50.8609 29.1247C51.1429 29.0336 51.4493 29.0578 51.7136 29.1919C51.978 29.326 52.1789 29.5593 52.2727 29.8411C52.3241 29.9825 52.3468 30.1327 52.3394 30.283C52.332 30.4333 52.2947 30.5806 52.2297 30.7162C52.1647 30.8518 52.0733 30.973 51.9609 31.0726C51.8486 31.1723 51.7174 31.2484 51.5753 31.2965C50.6591 31.5049 49.7246 31.6221 48.7854 31.6463Z" fill="#42413E"/>
+<path d="M51.2796 37.1493C49.8678 37.1493 45.3794 34.6503 44.935 34.3287C44.3345 33.9403 43.8962 33.3453 43.7025 32.6555C43.5088 31.9657 43.5731 31.2287 43.8832 30.5831C44.1184 30.052 44.4991 29.5988 44.9811 29.2763C45.463 28.9537 46.0263 28.775 46.6056 28.761C46.9039 28.761 47.19 28.8799 47.401 29.0914C47.612 29.303 47.7305 29.59 47.7305 29.8892C47.7305 30.1884 47.612 30.4754 47.401 30.687C47.19 30.8986 46.9039 31.0174 46.6056 31.0174C46.4598 31.0325 46.321 31.0873 46.204 31.1758C46.087 31.2643 45.9964 31.3831 45.9418 31.5195C45.8509 31.6793 45.8258 31.8685 45.8721 32.0467C45.9183 32.2248 46.0322 32.3777 46.1893 32.4728C46.9824 33.0031 50.5822 34.8082 51.3246 34.8928C52.3536 34.6174 53.348 34.2257 54.2888 33.7251C54.5566 33.5927 54.8658 33.5724 55.1485 33.6687C55.2885 33.7164 55.4177 33.7912 55.5288 33.889C55.64 33.9867 55.7308 34.1055 55.7962 34.2385C55.8616 34.3714 55.9002 34.516 55.9098 34.664C55.9195 34.8119 55.9 34.9603 55.8525 35.1007C55.8049 35.2411 55.7303 35.3707 55.6328 35.4822C55.5353 35.5936 55.4169 35.6847 55.2843 35.7503C54.4294 36.1734 52.3427 37.1493 51.2796 37.1493Z" fill="#42413E"/>
+<path d="M45.6753 24.8466C45.6116 24.852 45.5477 24.852 45.484 24.8466L37.1596 23.3968C36.4581 23.2742 35.8337 22.8774 35.4235 22.2937C35.0133 21.7099 34.8508 20.9867 34.9716 20.2829L36.5578 11.009C36.68 10.3054 37.0756 9.67924 37.6577 9.26784C38.2397 8.85645 38.9608 8.69345 39.6625 8.81462L48.9319 10.4223C49.6334 10.5449 50.2578 10.9417 50.668 11.5255C51.0782 12.1092 51.2407 12.8324 51.1199 13.5362L50.2818 18.3932C50.2606 18.5426 50.2097 18.6863 50.1322 18.8157C50.0546 18.9451 49.9519 19.0575 49.8302 19.1464C49.7085 19.2352 49.5703 19.2987 49.4237 19.333C49.2771 19.3673 49.1251 19.3717 48.9768 19.346C48.8285 19.3204 48.6868 19.2651 48.5601 19.1835C48.4335 19.1019 48.3245 18.9956 48.2395 18.871C48.1545 18.7464 48.0954 18.6059 48.0655 18.458C48.0357 18.31 48.0358 18.1575 48.0657 18.0096L48.9038 13.147C48.9235 13.0326 48.8972 12.915 48.8309 12.8199C48.7645 12.7248 48.6633 12.6599 48.5495 12.6393L39.3251 11.0316C39.2686 11.0212 39.2106 11.0223 39.1545 11.0349C39.0985 11.0475 39.0455 11.0713 38.9988 11.1049C38.9517 11.1376 38.9115 11.1794 38.8807 11.2278C38.8498 11.2762 38.8287 11.3303 38.8188 11.3869L37.2158 20.6383C37.1977 20.7525 37.2245 20.8693 37.2906 20.964C37.3567 21.0588 37.457 21.124 37.5702 21.146L45.8946 22.5958C46.193 22.6212 46.469 22.7645 46.6621 22.994C46.8551 23.2236 46.9493 23.5207 46.9239 23.8199C46.8986 24.1191 46.7557 24.396 46.5268 24.5896C46.2979 24.7831 46.0017 24.8776 45.7034 24.8522L45.6753 24.8466Z" fill="#42413E"/>
+<path d="M13.3082 27.7819C13.1011 27.7844 12.8974 27.7295 12.7194 27.6232C12.5415 27.517 12.3962 27.3635 12.2997 27.1797C12.2031 26.996 12.159 26.7891 12.1722 26.5818C12.1854 26.3745 12.2554 26.1749 12.3745 26.005C13.0204 25.0842 13.3669 23.9858 13.3669 22.8601C13.3669 21.7343 13.0204 20.636 12.3745 19.7152C12.2145 19.4703 12.1556 19.1725 12.2104 18.8849C12.2652 18.5973 12.4293 18.3423 12.6681 18.1738C12.907 18.0053 13.2017 17.9366 13.4902 17.9821C13.7786 18.0276 14.0381 18.1838 14.2138 18.4177C15.1271 19.719 15.6173 21.2715 15.6173 22.8629C15.6173 24.4542 15.1271 26.0067 14.2138 27.308C14.1108 27.4531 13.9751 27.5716 13.8177 27.654C13.6603 27.7363 13.4857 27.7802 13.3082 27.7819Z" fill="#42413E"/>
+<path d="M17.6708 30.0258C17.4707 30.0255 17.2742 29.9718 17.1017 29.87C16.9292 29.7682 16.7869 29.6222 16.6894 29.4468C16.592 29.2715 16.543 29.0733 16.5474 28.8726C16.5518 28.6719 16.6095 28.4761 16.7146 28.3052C17.7233 26.6677 18.2576 24.7808 18.2576 22.856C18.2576 20.9311 17.7233 19.0442 16.7146 17.4067C16.6201 17.2808 16.553 17.1366 16.5174 16.9831C16.4819 16.8297 16.4788 16.6705 16.5084 16.5158C16.5379 16.361 16.5994 16.2142 16.689 16.0848C16.7785 15.9554 16.8941 15.8462 17.0282 15.7643C17.1624 15.6824 17.3122 15.6295 17.4679 15.6092C17.6237 15.5888 17.7819 15.6014 17.9325 15.6461C18.0831 15.6909 18.2227 15.7667 18.3423 15.8688C18.462 15.9709 18.5589 16.097 18.627 16.239C19.8569 18.2339 20.5084 20.533 20.5084 22.8785C20.5084 25.224 19.8569 27.5231 18.627 29.5181C18.523 29.6765 18.3809 29.806 18.2138 29.8948C18.0466 29.9835 17.8599 30.0286 17.6708 30.0258Z" fill="#42413E"/>
+<path d="M22.2101 32.3718C22.0132 32.3706 21.8201 32.3176 21.65 32.2181C21.4799 32.1186 21.3389 31.976 21.241 31.8047C21.143 31.6334 21.0916 31.4393 21.0919 31.2419C21.0922 31.0444 21.1442 30.8505 21.2427 30.6794C22.624 28.3088 23.352 25.6124 23.352 22.8666C23.352 20.1208 22.624 17.4243 21.2427 15.0537C21.1546 14.9256 21.094 14.7806 21.0645 14.6279C21.035 14.4751 21.0373 14.3179 21.0713 14.1661C21.1053 14.0143 21.1702 13.8712 21.262 13.7458C21.3538 13.6204 21.4705 13.5153 21.6047 13.4373C21.7389 13.3593 21.8877 13.3099 22.0419 13.2924C22.196 13.2748 22.3521 13.2894 22.5003 13.3352C22.6486 13.3811 22.7858 13.4572 22.9033 13.5588C23.0208 13.6603 23.1161 13.7852 23.1832 13.9255C24.7672 16.6425 25.6021 19.7332 25.6021 22.8807C25.6021 26.0281 24.7672 29.1188 23.1832 31.8359C23.081 32.002 22.9377 32.1387 22.7671 32.2326C22.5966 32.3265 22.4047 32.3745 22.2101 32.3718Z" fill="#42413E"/>
+<path d="M26.9292 34.8013C26.7314 34.8021 26.5368 34.7505 26.3652 34.6518C26.1935 34.5531 26.0509 34.4108 25.9516 34.2391C25.8524 34.0675 25.8 33.8726 25.7998 33.6742C25.7996 33.4758 25.8516 33.2808 25.9505 33.109C27.7199 29.9792 28.6499 26.4429 28.6499 22.845C28.6499 19.2472 27.7199 15.7109 25.9505 12.5811C25.8767 12.4522 25.8288 12.31 25.8098 12.1625C25.7907 12.0151 25.8008 11.8653 25.8394 11.7218C25.9175 11.432 26.1072 11.1851 26.3667 11.0354C26.6263 10.8858 26.9345 10.8458 27.2235 10.924C27.5125 11.0023 27.7587 11.1926 27.9079 11.4529C29.8706 14.923 30.9023 18.8443 30.9023 22.8338C30.9023 26.8232 29.8706 30.7445 27.9079 34.2146C27.8117 34.391 27.6702 34.5384 27.4981 34.6415C27.3261 34.7447 27.1297 34.7998 26.9292 34.8013Z" fill="#42413E"/>
+</g>
+<defs>
+<clipPath id="nfc_clip1">
+<rect width="71.9997" height="46.0199" fill="white"/>
+</clipPath>
+</defs>
+</svg></div>
+        <div class="instruction2">Hold your card to<br>the indicated area</div>
+        <div class="price-container2"><div class="price-shimmer2"><span class="price2">£7.40</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scene qa-scene hidden" data-scene="quick">
+  <div class="qa-widget" id="qa3">
+    <div class="qa-screen"><div class="qa-amount"><span class="qa-cur">£</span><span class="qa-val">0.00</span></div></div>
+    <div class="qa-actions">
+      <div class="qa-label">Quick actions</div>
+      <div class="qa-row">
+        <button class="qa-pill" type="button" data-add="5">+£5.00</button>
+        <button class="qa-pill" type="button" data-add="10">+£10.00</button>
+        <button class="qa-pill" type="button"><svg viewBox="0 0 20 20" fill="none"><path d="M5.6 2.75h4.5l4.55 4.55V15.6A2.15 2.15 0 0 1 12.5 17.75H5.6A2.15 2.15 0 0 1 3.45 15.6V4.9A2.15 2.15 0 0 1 5.6 2.75Z" stroke="currentColor" stroke-width="1.4"/><path d="M10 2.9V7.4h4.5" stroke="currentColor" stroke-width="1.4"/><path d="M6.8 11.1h5M6.8 13.5h3.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Add ref.</button>
+        <button class="qa-pill qa-pill-round" type="button" aria-label="More"><svg viewBox="0 0 20 20" fill="none"><path d="M10 4.6v10.8M4.6 10h10.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+      </div>
+    </div>
+
+    <div class="qa-panel" id="qaPanel">
+      <div class="qas-row">
+        <span class="qas-ic"><svg viewBox="0 0 20 20" fill="rgba(22,20,14,.55)"><path d="M10 1.66659C10.4603 1.66659 10.8334 2.03968 10.8334 2.49992C10.8334 2.96016 10.4603 3.33325 10 3.33325C6.31814 3.33325 3.33337 6.31802 3.33337 9.99992C3.33337 13.6818 6.31814 16.6666 10 16.6666C13.682 16.6666 16.6667 13.6818 16.6667 9.99992C16.6667 9.53968 17.0398 9.16659 17.5 9.16659C17.9603 9.16659 18.3334 9.53968 18.3334 9.99992C18.3334 14.6023 14.6024 18.3333 10 18.3333C5.39767 18.3333 1.6667 14.6023 1.6667 9.99992C1.6667 5.39755 5.39766 1.66659 10 1.66659Z"/><path d="M10 4.58325C10.4603 4.58325 10.8334 4.95635 10.8334 5.41659V5.78931C11.4014 5.97222 11.9281 6.32963 12.286 6.90259L12.4121 7.1272L12.4463 7.20532C12.5961 7.60027 12.4254 8.05239 12.0394 8.24536C11.6535 8.43832 11.1897 8.30347 10.9636 7.9467L10.9213 7.87264L10.8789 7.79696C10.6491 7.42974 10.1631 7.23479 9.61592 7.32576C9.03678 7.42206 8.75022 7.76173 8.75004 8.1477C8.75004 8.44664 8.84955 8.58474 9.04138 8.71737C9.3031 8.89825 9.68672 9.0238 10.2401 9.19019C10.7241 9.33572 11.3809 9.52366 11.8978 9.87215C12.4862 10.2688 12.9166 10.8843 12.9167 11.7878C12.9167 13.152 11.8492 13.9227 10.8334 14.2065V14.5833C10.8334 15.0435 10.4603 15.4166 10 15.4166C9.5398 15.4166 9.1667 15.0435 9.1667 14.5833V14.2789C8.40617 14.1396 7.66542 13.7504 7.23474 12.9915L7.17126 12.8726L7.13708 12.7945C6.9873 12.3996 7.15805 11.9474 7.54398 11.7545C7.9299 11.5615 8.39373 11.6964 8.61983 12.0531L8.70121 12.1956C8.91966 12.53 9.47006 12.7633 10.1791 12.648C10.9431 12.5237 11.25 12.1188 11.25 11.7878C11.25 11.5115 11.1594 11.3839 10.9668 11.254C10.7026 11.0759 10.3176 10.9537 9.75996 10.7861C9.27172 10.6392 8.61359 10.4476 8.09411 10.0886C7.50482 9.68136 7.08337 9.05554 7.08337 8.1477C7.08355 6.75848 8.13277 5.95275 9.1667 5.71688V5.41659C9.1667 4.95635 9.5398 4.58325 10 4.58325Z"/><path d="M15.8334 0.833252C16.2936 0.833252 16.6667 1.20635 16.6667 1.66659V3.33325H18.3334C18.7936 3.33325 19.1667 3.70635 19.1667 4.16659C19.1667 4.62682 18.7936 4.99992 18.3334 4.99992H16.6667V6.66659C16.6667 7.12682 16.2936 7.49992 15.8334 7.49992C15.3731 7.49992 15 7.12682 15 6.66659V4.99992H13.3334C12.8731 4.99992 12.5 4.62682 12.5 4.16659C12.5 3.70635 12.8731 3.33325 13.3334 3.33325H15V1.66659C15 1.20635 15.3731 0.833252 15.8334 0.833252Z"/></svg></span>
+        <div class="qas-txt">
+          <div class="qas-title">Quick amounts</div>
+          <div class="qas-sub">One-tap shortcuts for amounts you charge often.</div>
+        </div>
+        <span class="qas-toggle" id="qaToggle"><span class="qas-knob"></span></span>
+      </div>
+      <div class="qas-amounts" id="qaAmounts">
+        <div class="qas-amt-row"><div class="qas-field">£5.00</div><button class="qas-del" aria-label="Delete"><svg viewBox="0 0 20 20" fill="rgba(9,8,6,.925)"><path d="M8.33337 8.33333C8.79361 8.33333 9.16671 8.70643 9.16671 9.16667V13.3333C9.16671 13.7936 8.79361 14.1667 8.33337 14.1667C7.87314 14.1667 7.50004 13.7936 7.50004 13.3333V9.16667C7.50004 8.70643 7.87314 8.33333 8.33337 8.33333Z"/><path d="M11.6667 8.33333C12.1269 8.33333 12.5 8.70643 12.5 9.16667V13.3333C12.5 13.7936 12.1269 14.1667 11.6667 14.1667C11.2065 14.1667 10.8334 13.7936 10.8334 13.3333V9.16667C10.8334 8.70643 11.2065 8.33333 11.6667 8.33333Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M10 1.25C11.8661 1.25018 13.4443 2.4764 13.9755 4.16667H17.0834C17.5436 4.16667 17.9167 4.53976 17.9167 5C17.9167 5.46024 17.5436 5.83333 17.0834 5.83333H16.6407L15.9921 15.2295C15.8714 16.9771 14.4186 18.3332 12.6669 18.3333H7.33321C5.63626 18.3332 4.22004 17.0605 4.02348 15.3923L4.00802 15.2295L3.35942 5.83333H2.91671C2.45647 5.83333 2.08337 5.46024 2.08337 5C2.08337 4.53976 2.45647 4.16667 2.91671 4.16667H6.02462C6.55578 2.47638 8.13395 1.25013 10 1.25ZM5.67061 15.1147L5.69014 15.2759C5.82273 16.0704 6.51209 16.6665 7.33321 16.6667H12.6669C13.5426 16.6665 14.2692 15.9885 14.3295 15.1147L14.9691 5.83333H5.03097L5.67061 15.1147ZM10 2.91667C9.0756 2.91678 8.26855 3.41995 7.83614 4.16667H12.1656C11.7331 3.41957 10.9248 2.91681 10 2.91667Z"/></svg></button></div>
+        <div class="qas-amt-row"><div class="qas-field">£10.00</div><button class="qas-del" aria-label="Delete"><svg viewBox="0 0 20 20" fill="rgba(9,8,6,.925)"><path d="M8.33337 8.33333C8.79361 8.33333 9.16671 8.70643 9.16671 9.16667V13.3333C9.16671 13.7936 8.79361 14.1667 8.33337 14.1667C7.87314 14.1667 7.50004 13.7936 7.50004 13.3333V9.16667C7.50004 8.70643 7.87314 8.33333 8.33337 8.33333Z"/><path d="M11.6667 8.33333C12.1269 8.33333 12.5 8.70643 12.5 9.16667V13.3333C12.5 13.7936 12.1269 14.1667 11.6667 14.1667C11.2065 14.1667 10.8334 13.7936 10.8334 13.3333V9.16667C10.8334 8.70643 11.2065 8.33333 11.6667 8.33333Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M10 1.25C11.8661 1.25018 13.4443 2.4764 13.9755 4.16667H17.0834C17.5436 4.16667 17.9167 4.53976 17.9167 5C17.9167 5.46024 17.5436 5.83333 17.0834 5.83333H16.6407L15.9921 15.2295C15.8714 16.9771 14.4186 18.3332 12.6669 18.3333H7.33321C5.63626 18.3332 4.22004 17.0605 4.02348 15.3923L4.00802 15.2295L3.35942 5.83333H2.91671C2.45647 5.83333 2.08337 5.46024 2.08337 5C2.08337 4.53976 2.45647 4.16667 2.91671 4.16667H6.02462C6.55578 2.47638 8.13395 1.25013 10 1.25ZM5.67061 15.1147L5.69014 15.2759C5.82273 16.0704 6.51209 16.6665 7.33321 16.6667H12.6669C13.5426 16.6665 14.2692 15.9885 14.3295 15.1147L14.9691 5.83333H5.03097L5.67061 15.1147ZM10 2.91667C9.0756 2.91678 8.26855 3.41995 7.83614 4.16667H12.1656C11.7331 3.41957 10.9248 2.91681 10 2.91667Z"/></svg></button></div>
+        <button class="qas-addnew" type="button"><svg viewBox="0 0 20 20" fill="none"><path d="M10 4.2v11.6M4.2 10h11.6" stroke="rgba(9,8,6,.925)" stroke-width="1.8" stroke-linecap="round"/></svg>Add new</button>
+      </div>
+      <div class="qas-row">
+        <span class="qas-ic"><svg viewBox="0 0 20 20" fill="rgba(22,20,14,.55)"><path d="M10.0237 2.5C14.1658 2.50013 17.5237 5.85794 17.5237 10C17.5237 14.1421 14.1658 17.4999 10.0237 17.5C6.75695 17.5 3.98024 15.4117 2.95099 12.5L4.52163 11.9442C5.32283 14.2109 7.48518 15.8333 10.0237 15.8333C13.2453 15.8332 15.8571 13.2216 15.8571 10C15.8571 6.77841 13.2453 4.16679 10.0237 4.16667C8.37926 4.16667 7.18969 4.73359 6.03693 5.83333H7.50014L7.58559 5.8374C8.00558 5.88029 8.33348 6.23535 8.33348 6.66667C8.33348 7.09798 8.00558 7.45304 7.58559 7.49593L7.50014 7.5H5.00014C4.07967 7.5 3.33348 6.7538 3.33348 5.83333V3.33333C3.33348 2.8731 3.70657 2.5 4.16681 2.5C4.62693 2.50013 5.00014 2.87318 5.00014 3.33333V4.5223C6.35239 3.27036 7.89654 2.5 10.0237 2.5Z"/><path d="M3.4588 11.4364C3.89249 11.2833 4.36813 11.5107 4.52163 11.9442L2.95099 12.5C2.79761 12.0661 3.02487 11.5897 3.4588 11.4364Z"/></svg></span>
+        <div class="qas-txt"><div class="qas-title">Repeat last amount</div></div>
+        <span class="qas-toggle"><span class="qas-knob"></span></span>
+      </div>
+      <div class="qas-row">
+        <span class="qas-ic"><svg viewBox="0 0 20 20" fill="rgba(22,20,14,.55)"><path d="M12.9167 13.3334C13.3769 13.3334 13.75 13.7065 13.75 14.1667C13.75 14.627 13.3769 15.0001 12.9167 15.0001H7.49999C7.03976 15.0001 6.66666 14.627 6.66666 14.1667C6.66666 13.7065 7.03976 13.3334 7.49999 13.3334H12.9167Z"/><path d="M9.99999 10.0001C10.4602 10.0001 10.8333 10.3732 10.8333 10.8334C10.8333 11.2937 10.4602 11.6667 9.99999 11.6667H7.49999C7.03976 11.6667 6.66666 11.2937 6.66666 10.8334C6.66666 10.3732 7.03976 10.0001 7.49999 10.0001H9.99999Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M10.1432 1.66675C10.8062 1.66681 11.442 1.9304 11.9108 2.39917L15.9342 6.42261C16.4031 6.89141 16.6666 7.52724 16.6667 8.19019V15.0001C16.6667 16.8411 15.1743 18.3334 13.3333 18.3334H6.66666C4.82573 18.3334 3.33333 16.8411 3.33333 15.0001V5.00008C3.33333 3.15914 4.82572 1.66675 6.66666 1.66675H10.1432ZM6.66666 3.33341C5.74619 3.33341 4.99999 4.07961 4.99999 5.00008V15.0001C4.99999 15.9206 5.74618 16.6667 6.66666 16.6667H13.3333C14.2538 16.6667 15 15.9206 15 15.0001V8.33341H12.5C11.1192 8.33341 9.99999 7.21412 9.99999 5.83341V3.33341H6.66666ZM11.6667 5.83341C11.6667 6.29366 12.0397 6.66675 12.5 6.66675H13.8216L11.6667 4.5118V5.83341Z"/></svg></span>
+        <div class="qas-txt"><div class="qas-title">Add payment reference</div></div>
+        <span class="qas-toggle"><span class="qas-knob"></span></span>
+      </div>
+      <div class="qas-row">
+        <span class="qas-ic"><svg viewBox="0 0 20 20" fill="rgba(22,20,14,.55)"><path d="M9.99999 5.83341C10.4602 5.83341 10.8333 6.20651 10.8333 6.66675V9.65503L12.6725 11.4942L12.7295 11.5577C12.9964 11.885 12.9776 12.3675 12.6725 12.6726C12.3674 12.9777 11.8849 12.9965 11.5576 12.7296L11.4941 12.6726L9.4108 10.5893C9.25452 10.433 9.16666 10.2211 9.16666 10.0001V6.66675C9.16666 6.20651 9.53975 5.83341 9.99999 5.83341Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9.99999 1.66675C14.6024 1.66675 18.3333 5.39771 18.3333 10.0001C18.3333 14.6025 14.6024 18.3334 9.99999 18.3334C5.39762 18.3334 1.66666 14.6025 1.66666 10.0001C1.66666 5.39771 5.39762 1.66675 9.99999 1.66675ZM9.99999 3.33341C6.31809 3.33341 3.33332 6.31819 3.33332 10.0001C3.33332 13.682 6.31809 16.6667 9.99999 16.6667C13.6819 16.6667 16.6667 13.682 16.6667 10.0001C16.6667 6.31818 13.6819 3.33341 9.99999 3.33341Z"/></svg></span>
+        <div class="qas-txt"><div class="qas-title">See transactions</div></div>
+        <span class="qas-toggle"><span class="qas-knob"></span></span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+  var val=document.getElementById('val'), amount=document.getElementById('amount');
+  var menu=document.getElementById('menu'), btnMenu=document.getElementById('btnMenu');
+  var keys={}; [].forEach.call(document.querySelectorAll('.key'), function(k){ keys[k.dataset.k]=k; });
+
+  function fmt(v){ return v.toFixed(2); }
+  function easeInOut(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+  var rollRAF=0;
+  function roll(from, to, dur, done){
+    cancelAnimationFrame(rollRAF);
+    var start=performance.now();
+    (function step(now){
+      var t=Math.min(1,(now-start)/dur), e=easeInOut(t);
+      val.textContent=fmt(from+(to-from)*e);
+      if(t<1) rollRAF=requestAnimationFrame(step); else { val.textContent=fmt(to); done&&done(); }
+    })(start);
+  }
+  function press(el, ms){ if(!el) return; el.classList.add('pressed'); setTimeout(function(){ el.classList.remove('pressed'); }, ms||170); }
+
+  var timers=[];
+  function at(ms, fn){ timers.push(setTimeout(fn, ms)); }
+  function clearAll(){ timers.forEach(clearTimeout); timers=[]; }
+
+  function cycle(){
+    clearAll();
+    // reset
+    amount.classList.remove('entered'); val.textContent='0.00';
+    menu.classList.remove('open');
+    // 1) type £10.00 — keys tapped, value rolls up
+    at(800, function(){ amount.classList.add('entered'); roll(0, 10, 1350); });
+    at(820,  function(){ press(keys['1']); });
+    at(1150, function(){ press(keys['0']); });
+    at(1480, function(){ press(keys['0']); });
+    at(1810, function(){ press(keys['0']); });
+    // 2) open calculator menu (elastic drop)
+    at(2900, function(){ press(btnMenu, 220); });
+    at(3020, function(){ menu.classList.add('open'); });
+    // 3) collapse the menu gracefully
+    at(4900, function(){ menu.classList.remove('open'); });
+    // 4) then roll the value back down to £0.00
+    at(5750, function(){ roll(10, 0, 1150, function(){ amount.classList.remove('entered'); }); });
+    // 5) loop
+    at(7500, cycle);
+  }
+  cycle();
+})();
+
+// scene tabs — switch which screen is shown, keep it centred for recording
+(function(){
+  var tabs=document.querySelectorAll('.tab'), scenes=document.querySelectorAll('.scene');
+  [].forEach.call(tabs, function(t){
+    t.addEventListener('click', function(){
+      [].forEach.call(tabs, function(x){ x.classList.toggle('active', x===t); });
+      [].forEach.call(scenes, function(s){ s.classList.toggle('hidden', s.dataset.scene!==t.dataset.scene); });
+    });
+  });
+})();
+
+// ── quick actions scene: the site card's behaviour, then "+" opens the actions list panel ──
+(function(){
+  var qa=document.getElementById('qa3'); if(!qa) return;
+  var val=qa.querySelector('.qa-val'), amt=qa.querySelector('.qa-amount');
+  var pills=qa.querySelectorAll('.qa-row .qa-pill');
+  var p5=pills[0], p10=pills[1], pRef=pills[2], pPlus=pills[3];
+  var panel=document.getElementById('qaPanel'), tog=document.getElementById('qaToggle'),
+      amounts=document.getElementById('qaAmounts');
+  var rows=panel.querySelectorAll('.qas-row');
+  var timers=[];
+  function at(ms,fn){ timers.push(setTimeout(fn,ms)); }
+  function press(el,ms){ el.classList.add('pressed'); setTimeout(function(){ el.classList.remove('pressed'); }, ms||220); }
+  function rollUp(){ var start=performance.now(); amt.classList.add('entered');
+    (function step(now){ var t=Math.min(1,(now-start)/780), e=1-Math.pow(1-t,3);
+      val.textContent=(10*e).toFixed(2);
+      if(t<1) requestAnimationFrame(step); else val.textContent='10.00'; })(start); }
+  function rollDown(){ var start=performance.now();
+    (function step(now){ var t=Math.min(1,(now-start)/720), e=1-Math.pow(1-t,3);
+      val.textContent=(10*(1-e)).toFixed(2);
+      if(t<1) requestAnimationFrame(step); else { val.textContent='0.00'; amt.classList.remove('entered'); } })(start); }
+  function reorderDemo(){
+    // measure in layout space — offsetLeft/Width ignore transforms
+    var gap=p10.offsetLeft-(p5.offsetLeft+p5.offsetWidth);
+    var tAdd=p5.offsetLeft-pRef.offsetLeft;
+    var shift=pRef.offsetWidth+gap;
+    pRef.classList.add('lifted'); pRef.style.translate='0px -7px';
+    setTimeout(function(){
+      pRef.style.translate=tAdd+'px -7px'; p5.style.translate=shift+'px 0'; p10.style.translate=shift+'px 0';
+      setTimeout(function(){ pRef.classList.remove('lifted'); pRef.style.translate=tAdd+'px 0'; }, 760);
+    }, 480);
+  }
+  function swapBack(){                                 // roll down + chips slide home (site's ending)
+    rollDown();
+    pRef.style.translate=''; p5.style.translate=''; p10.style.translate='';
+  }
+  function resetAll(){
+    timers.forEach(clearTimeout); timers=[];
+    [p5,p10,pRef].forEach(function(p){ p.classList.add('noanim'); p.classList.remove('lifted'); p.style.translate=''; });
+    void qa.offsetWidth;
+    [p5,p10,pRef].forEach(function(p){ p.classList.remove('noanim'); });
+    amt.classList.remove('entered'); val.textContent='0.00';
+    panel.classList.remove('in'); tog.classList.remove('on'); amounts.classList.remove('on');
+    [].forEach.call(rows, function(r){ r.classList.remove('in'); });
+  }
+  function cycle(){
+    resetAll();
+    at(900,  function(){ press(p10,230); rollUp(); });
+    at(2400, reorderDemo);                             // Add ref. lifts, jiggles, drags to front
+    at(5100, swapBack);                                // chips home + value rolls back to £0
+    at(6100, function(){ press(pPlus,240); });         // "+" tapped…
+    at(6450, function(){ panel.classList.add('in'); });          // …actions list slides in
+    [].forEach.call(rows, function(r,i){                          // items fade in one by one
+      at(6780 + i*140, function(){ r.classList.add('in'); });
+    });
+    at(7900, function(){ tog.classList.add('on'); amounts.classList.add('on'); });   // toggle on → quick amounts reveal
+    at(10400, function(){ panel.classList.remove('in'); });      // panel slides out…
+    at(11400, cycle);                                  // …amount view is back → loop
+  }
+  cycle();
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── payment scene: the site's 3D particle globe (Fibonacci sphere + wave ripple), verbatim ──
+(function(){
+  var canvas=document.getElementById('globe2');
+  if(!canvas || typeof THREE==='undefined') return;
+  var W=393, H=852;                                   // phone screen coords, like the site
+  canvas.width=W*2; canvas.height=H*2;                // retina
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(45, W/H, 0.1, 100);
+  camera.position.z=4.5;
+  var renderer=new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true});
+  renderer.setSize(W,H); renderer.setPixelRatio(2);
+
+  // evenly distributed points on a unit sphere — Fibonacci (golden-spiral)
+  var COUNT=2200, GOLDEN=Math.PI*(3-Math.sqrt(5)), pts=[];
+  for(var i=0;i<COUNT;i++){
+    var y=1-(i/(COUNT-1))*2, r=Math.sqrt(Math.max(0,1-y*y)), th=GOLDEN*i;
+    pts.push([Math.cos(th)*r, y, Math.sin(th)*r]);
+  }
+  var geometry=new THREE.BufferGeometry();
+  var positions=new Float32Array(COUNT*3), sizes=new Float32Array(COUNT);
+  for(var j=0;j<COUNT;j++){
+    positions[j*3]=pts[j][0]; positions[j*3+1]=pts[j][1]; positions[j*3+2]=pts[j][2];
+    sizes[j]=0.36+Math.random()*0.06;
+  }
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  geometry.setAttribute('size', new THREE.BufferAttribute(sizes,1));
+
+  var material=new THREE.ShaderMaterial({
+    uniforms:{
+      uOpacity:{value:0.9},
+      uTime:{value:0.0},
+      uWaveOrigin:{value:new THREE.Vector3(-0.7069,-0.2716,0.6532)},
+      uDarkMode:{value:0.0}
+    },
+    vertexShader:`
+      attribute float size;
+      uniform float uTime;
+      uniform vec3 uWaveOrigin;
+      varying float vDist; varying float vWave; varying float vGradient;
+      void main() {
+        vec3 dir = normalize(position);
+        vGradient = dir.y * 0.5 + 0.5;
+        float angle = acos(clamp(dot(dir, normalize(uWaveOrigin)), -1.0, 1.0));
+        float wave1 = sin(angle * 5.0 - uTime * 1.8) * exp(-angle * 0.4);
+        float wave2 = sin(angle * 3.5 - uTime * 1.2 + 1.5) * exp(-angle * 0.5) * 0.5;
+        float wave = wave1 + wave2;
+        float displacement = wave * 0.15;
+        vec3 displaced = position + dir * displacement;
+        vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
+        float sizePulse = 1.0 + max(0.0, wave) * 0.3;
+        gl_PointSize = size * sizePulse * (50.0 / -mvPosition.z);
+        gl_Position = projectionMatrix * mvPosition;
+        vDist = -mvPosition.z; vWave = wave;
+      }
+    `,
+    fragmentShader:`
+      uniform float uOpacity; uniform float uDarkMode;
+      varying float vDist; varying float vWave; varying float vGradient;
+      void main() {
+        vec2 uv = gl_PointCoord - vec2(0.5);
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float z = sqrt(max(0.0, 0.25 - d * d)) * 2.0;
+        vec3 normal = normalize(vec3(uv * 2.0, z));
+        vec3 lightDir = normalize(vec3(-0.35, 0.55, 0.85));
+        float diff = clamp(dot(normal, lightDir), 0.0, 1.0);
+        float shade = 0.55 + 0.45 * diff;
+        float alpha = smoothstep(0.5, 0.43, d) * uOpacity;
+        float waveBright = 1.0 + max(0.0, vWave) * 0.35;
+        alpha *= waveBright;
+        float depthFade = clamp(1.0 - (vDist - 3.0) * 0.3, 0.2, 1.0);
+        vec3 colBottom = vec3(0.663, 1.0, 0.651);
+        vec3 colTop    = vec3(0.992, 1.0, 0.706);
+        float colorMix = smoothstep(0.0, 0.3, vGradient);
+        vec3 darkColor = mix(colBottom, colTop, colorMix);
+        float darkAlpha = 0.5 + 0.5 * vGradient;
+        vec3 lightCenter = vec3(0.694, 0.937, 0.024);
+        vec3 lightEdge   = vec3(0.863, 0.925, 0.0);
+        float lightMix = smoothstep(0.0, 0.3, vGradient);
+        vec3 lightColor = mix(lightEdge, lightCenter, lightMix);
+        float lightAlpha = 0.5 + 0.5 * vGradient;
+        vec3 color = mix(lightColor, darkColor, uDarkMode) * shade;
+        float gradientAlpha = mix(lightAlpha, darkAlpha, uDarkMode);
+        gl_FragColor = vec4(color, alpha * depthFade * gradientAlpha);
+      }
+    `,
+    transparent:true, depthWrite:false, blending:THREE.NormalBlending
+  });
+
+  var particles=new THREE.Points(geometry, material);
+  // static orientation — core pattern facing camera (same as the site)
+  particles.rotation.y=Math.PI/2-0.82;
+  particles.rotation.x=0.175-0.524+0.262;
+  // centre the globe at the NFC antenna zone (196.5, 240) in phone coords
+  var ndcX=(196.5/W)*2-1, ndcY=-((240/H)*2-1);
+  particles.position.x=ndcX*2.2; particles.position.y=ndcY*2.2;
+  scene.add(particles);
+
+  (function animate(){
+    material.uniforms.uTime.value=performance.now()/1000;
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  })();
+})();
+</script>
+</body></html>
