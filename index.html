@@ -125,23 +125,33 @@
   .gen-slide{ position:absolute; inset:0; opacity:0; scale:1.02; pointer-events:none;
     transition:opacity .65s cubic-bezier(.45,.05,.25,1), scale .8s cubic-bezier(.45,.05,.25,1); }
   .gen-slide.on{ opacity:1; scale:1; }
-  /* amount slide fills the fixed white card — only the content transitions, card never moves */
+  /* .kpfit — keypad content fitted to the fixed 328×371 card (shared by General slide + Amount tab) */
   .gkp{ position:absolute; inset:0; }
-  .gkp .card{ position:absolute; inset:0; left:0; top:0; width:100%; height:100%; aspect-ratio:auto;
-    border-radius:0; box-shadow:none; padding:18px 22px 20px; }
-  .gkp .kp-btn{ width:36px; height:36px; }
-  .gkp .kp-btn svg{ width:18px; height:18px; }
-  .gkp .kp-amount{ font-size:44px; }
-  .gkp .kp-pad{ gap:10px 14px; }
-  .gkp .key{ aspect-ratio:auto; height:48px; font-size:21px; border-radius:12px; }
-  .gkp .key svg{ width:19px; height:19px; }
-  .gkp .kp-menu{ top:60px; left:112px; right:14px; border-radius:14px; transform:translateY(-8px) scale(.9); }
-  .gkp .kp-menu.open{ transform:translateY(0) scale(1); }
-  .gkp .kp-item{ gap:10px; padding:11px 14px; }
-  .gkp .kp-item + .kp-item::before{ left:14px; right:14px; }
-  .gkp .kp-item .ic{ width:15px; height:15px; }
-  .gkp .kp-item .lbl{ font-size:13px; }
-  .gkp .kp-item .chk{ width:14px; height:14px; }
+  .kpfit .card{ aspect-ratio:auto; padding:18px 22px 20px; }
+  .gkp .card{ position:absolute; inset:0; left:0; top:0; width:100%; height:100%;
+    border-radius:0; box-shadow:none; }
+  .kpfit .kp-btn{ width:36px; height:36px; }
+  .kpfit .kp-btn svg{ width:18px; height:18px; }
+  .kpfit .kp-amount{ font-size:44px; }
+  .kpfit .kp-pad{ gap:10px 14px; }
+  .kpfit .key{ aspect-ratio:auto; height:48px; font-size:21px; border-radius:12px; }
+  .kpfit .key svg{ width:19px; height:19px; }
+  .kpfit .kp-menu{ top:60px; left:112px; right:14px; border-radius:14px;
+    transform:translateY(-8px) scale(.9);
+    box-shadow:0 6px 16px -3px rgba(20,18,12,.14), 0 18px 46px -10px rgba(20,18,12,.2); }
+  .kpfit .kp-menu.open{ transform:translateY(0) scale(1); }
+  .kpfit .kp-item{ gap:10px; padding:11px 14px; }
+  .kpfit .kp-item + .kp-item::before{ left:14px; right:14px; }
+  .kpfit .kp-item .ic{ width:15px; height:15px; }
+  .kpfit .kp-item .lbl{ font-size:13px; }
+  .kpfit .kp-item .chk{ width:14px; height:14px; }
+
+  /* amount tab — same fixed card as the other tabs; the dropdown pops outside the card */
+  .amt-wrap{ position:relative; }
+  .amt-wrap .card{ position:relative; left:auto; top:auto; width:328px; height:371px;
+    border-radius:18px;
+    box-shadow:0 6px 14px -4px rgba(0,0,0,.05), 0 15px 34px -10px rgba(0,0,0,.06); }
+  .amt-wrap .kp-menu{ left:118px; right:-26px; }
   /* soft fade whenever a tab scene is revealed */
   @keyframes sceneIn{ from{ opacity:0; translate:0 6px; } to{ opacity:1; translate:0 0; } }
   .scene{ animation:sceneIn .5s cubic-bezier(.35,.55,.25,1); }
@@ -205,7 +215,7 @@
   <div class="gen-widget">
 
     <div class="gen-slide on" id="genAmount">
-      <div class="gkp" id="gKp">
+      <div class="gkp kpfit" id="gKp">
         <div class="card">
           <div class="kp-top">
             <button class="kp-btn" type="button" aria-label="Teya"><svg viewBox="7 7 17 17" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.0492 9.77295H12.218C10.8677 9.77295 9.77271 10.868 9.77271 12.2184V19.0548C9.77271 20.4052 10.8677 21.5002 12.218 21.5002H19.0544C20.4047 21.5002 21.5 20.4052 21.5 19.0548V12.2184C21.4945 10.868 20.3995 9.77295 19.0492 9.77295ZM19.0443 14.7406C17.6977 14.7406 16.6085 15.8251 16.6085 17.1544V18.4992H14.5539V17.1544C14.5539 16.0805 14.94 15.0916 15.5786 14.3208C16.4048 13.3319 17.6493 12.7048 19.0443 12.7048V14.7406ZM12.1182 12.7098V14.7406C12.9443 14.7406 13.6741 15.1499 14.1194 15.7718C14.3179 15.0649 14.6721 14.4164 15.1441 13.8687C14.3446 13.151 13.2824 12.7098 12.1182 12.7098Z"/></svg></button>
@@ -286,7 +296,8 @@
 
   </div>
 </div>
-<div class="screen scene hidden" id="screen" data-scene="amount">
+<div class="scene amt-scene hidden" data-scene="amount">
+<div class="amt-wrap kpfit">
   <div class="card" id="card">
     <div class="kp-top">
       <button class="kp-btn" id="btnLeft" aria-label="Teya"><svg viewBox="7 7 17 17" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.0492 9.77295H12.218C10.8677 9.77295 9.77271 10.868 9.77271 12.2184V19.0548C9.77271 20.4052 10.8677 21.5002 12.218 21.5002H19.0544C20.4047 21.5002 21.5 20.4052 21.5 19.0548V12.2184C21.4945 10.868 20.3995 9.77295 19.0492 9.77295ZM19.0443 14.7406C17.6977 14.7406 16.6085 15.8251 16.6085 17.1544V18.4992H14.5539V17.1544C14.5539 16.0805 14.94 15.0916 15.5786 14.3208C16.4048 13.3319 17.6493 12.7048 19.0443 12.7048V14.7406ZM12.1182 12.7098V14.7406C12.9443 14.7406 13.6741 15.1499 14.1194 15.7718C14.3179 15.0649 14.6721 14.4164 15.1441 13.8687C14.3446 13.151 13.2824 12.7098 12.1182 12.7098Z"/></svg></button>
@@ -326,6 +337,7 @@
       <span class="lbl">Whole digit</span>
     </div>
   </div>
+</div>
 </div>
 
 <div class="scene pay-scene hidden" data-scene="payment">
