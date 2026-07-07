@@ -125,10 +125,17 @@
   .gen-slide{ position:absolute; inset:0; opacity:0; scale:1.02; pointer-events:none;
     transition:opacity .65s cubic-bezier(.45,.05,.25,1), scale .8s cubic-bezier(.45,.05,.25,1); }
   .gen-slide.on{ opacity:1; scale:1; }
-  /* mini keypad slide — reuses the .card / .kp-* styles at a smaller footprint */
-  .gkp{ position:absolute; inset:0; background:#F2F3E9; display:flex; align-items:center; justify-content:center; }
-  .gkp .card{ position:relative; left:auto; top:auto; width:65%; }
-  .gkp .kp-menu{ top:30px; left:118px; right:10px; border-radius:14px; transform:translateY(-8px) scale(.9); }
+  /* amount slide fills the fixed white card — only the content transitions, card never moves */
+  .gkp{ position:absolute; inset:0; }
+  .gkp .card{ position:absolute; inset:0; left:0; top:0; width:100%; height:100%; aspect-ratio:auto;
+    border-radius:0; box-shadow:none; padding:18px 22px 20px; }
+  .gkp .kp-btn{ width:36px; height:36px; }
+  .gkp .kp-btn svg{ width:18px; height:18px; }
+  .gkp .kp-amount{ font-size:44px; }
+  .gkp .kp-pad{ gap:10px 14px; }
+  .gkp .key{ aspect-ratio:auto; height:48px; font-size:21px; border-radius:12px; }
+  .gkp .key svg{ width:19px; height:19px; }
+  .gkp .kp-menu{ top:60px; left:112px; right:14px; border-radius:14px; transform:translateY(-8px) scale(.9); }
   .gkp .kp-menu.open{ transform:translateY(0) scale(1); }
   .gkp .kp-item{ gap:10px; padding:11px 14px; }
   .gkp .kp-item + .kp-item::before{ left:14px; right:14px; }
