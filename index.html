@@ -119,6 +119,26 @@
     padding:1.4cqi 2cqi; }
   .qas-addnew svg{ width:5cqi; height:5cqi; }
 
+  /* ---- general scene: auto-cycling reel of the three experiences (same 328×371 widget) ---- */
+  .gen-widget{ width:328px; height:371px; position:relative; overflow:hidden; border-radius:18px;
+    background:#FCFBFA; container-type:inline-size; }
+  .gen-slide{ position:absolute; inset:0; opacity:0; scale:1.02; pointer-events:none;
+    transition:opacity .65s cubic-bezier(.45,.05,.25,1), scale .8s cubic-bezier(.45,.05,.25,1); }
+  .gen-slide.on{ opacity:1; scale:1; }
+  /* mini keypad slide — reuses the .card / .kp-* styles at a smaller footprint */
+  .gkp{ position:absolute; inset:0; background:#F2F3E9; display:flex; align-items:center; justify-content:center; }
+  .gkp .card{ position:relative; left:auto; top:auto; width:65%; }
+  .gkp .kp-menu{ top:30px; left:118px; right:10px; border-radius:14px; transform:translateY(-8px) scale(.9); }
+  .gkp .kp-menu.open{ transform:translateY(0) scale(1); }
+  .gkp .kp-item{ gap:10px; padding:11px 14px; }
+  .gkp .kp-item + .kp-item::before{ left:14px; right:14px; }
+  .gkp .kp-item .ic{ width:15px; height:15px; }
+  .gkp .kp-item .lbl{ font-size:13px; }
+  .gkp .kp-item .chk{ width:14px; height:14px; }
+  /* soft fade whenever a tab scene is revealed */
+  @keyframes sceneIn{ from{ opacity:0; translate:0 6px; } to{ opacity:1; translate:0 0; } }
+  .scene{ animation:sceneIn .5s cubic-bezier(.35,.55,.25,1); }
+
   /* white keypad card */
   .card{ position:absolute; left:10.8cqw; top:22cqh; width:78.2cqw; height:auto; aspect-ratio:281/430;
     background:#fff; border-radius:4.4cqw; container-type:inline-size;
@@ -168,12 +188,98 @@
 </style></head>
 <body>
 <nav class="tabs">
-  <button class="tab active" data-scene="amount">Amount</button>
+  <button class="tab active" data-scene="general">General</button>
+  <button class="tab" data-scene="amount">Amount</button>
   <button class="tab" data-scene="payment">Payment</button>
   <button class="tab" data-scene="quick">Quick actions</button>
 </nav>
 <div class="stage">
-<div class="screen scene" id="screen" data-scene="amount">
+<div class="scene gen-scene" data-scene="general">
+  <div class="gen-widget">
+
+    <div class="gen-slide on" id="genAmount">
+      <div class="gkp" id="gKp">
+        <div class="card">
+          <div class="kp-top">
+            <button class="kp-btn" type="button" aria-label="Teya"><svg viewBox="7 7 17 17" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.0492 9.77295H12.218C10.8677 9.77295 9.77271 10.868 9.77271 12.2184V19.0548C9.77271 20.4052 10.8677 21.5002 12.218 21.5002H19.0544C20.4047 21.5002 21.5 20.4052 21.5 19.0548V12.2184C21.4945 10.868 20.3995 9.77295 19.0492 9.77295ZM19.0443 14.7406C17.6977 14.7406 16.6085 15.8251 16.6085 17.1544V18.4992H14.5539V17.1544C14.5539 16.0805 14.94 15.0916 15.5786 14.3208C16.4048 13.3319 17.6493 12.7048 19.0443 12.7048V14.7406ZM12.1182 12.7098V14.7406C12.9443 14.7406 13.6741 15.1499 14.1194 15.7718C14.3179 15.0649 14.6721 14.4164 15.1441 13.8687C14.3446 13.151 13.2824 12.7098 12.1182 12.7098Z"/></svg></button>
+            <button class="kp-btn" type="button" aria-label="Calculator"><svg viewBox="7 7 17 17" fill="currentColor"><path d="M14.1703 17.917C14.62 17.917 14.9847 18.2817 14.9847 18.7314C14.9847 19.1812 14.62 19.5458 14.1703 19.5458C13.7205 19.5458 13.3559 19.1812 13.3559 18.7314C13.3559 18.2817 13.7205 17.917 14.1703 17.917Z"/><path d="M17.1021 17.917C17.5518 17.917 17.9165 18.2817 17.9165 18.7314C17.9165 19.1812 17.5518 19.5458 17.1021 19.5458C16.6524 19.5458 16.2877 19.1812 16.2877 18.7314C16.2877 18.2817 16.6524 17.917 17.1021 17.917Z"/><path d="M14.1703 14.9852C14.62 14.9852 14.9847 15.3499 14.9847 15.7996C14.9847 16.2494 14.62 16.614 14.1703 16.614C13.7205 16.614 13.3559 16.2493 13.3559 15.7996C13.3559 15.3499 13.7205 14.9852 14.1703 14.9852Z"/><path d="M17.1021 14.9852C17.5518 14.9852 17.9165 15.3499 17.9165 15.7996C17.9165 16.2494 17.5518 16.614 17.1021 16.614C16.6524 16.614 16.2877 16.2494 16.2877 15.7996C16.2877 15.3499 16.6524 14.9852 17.1021 14.9852Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18.2423 9.12158C19.6816 9.12158 20.8483 10.2884 20.8483 11.7276V19.5458C20.8483 20.9851 19.6816 22.1519 18.2423 22.1519H13.0301C11.5909 22.1519 10.4241 20.9852 10.4241 19.5458V11.7276C10.4241 10.2884 11.5908 9.12158 13.0301 9.12158H18.2423ZM11.7271 19.5458C11.7271 20.2655 12.3105 20.8489 13.0301 20.8489H18.2423C18.9619 20.8489 19.5453 20.2655 19.5453 19.5458V13.6822H11.7271V19.5458ZM13.0301 10.4246C12.3105 10.4246 11.7271 11.008 11.7271 11.7276V12.3792H19.5453V11.7276C19.5453 11.008 18.9619 10.4246 18.2423 10.4246H13.0301Z"/></svg></button>
+          </div>
+          <div class="kp-amount"><span class="kp-cur">£</span><span class="kp-val">0.00</span></div>
+          <div class="kp-pad">
+            <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
+            <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
+            <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
+            <button class="key" data-k="00">00</button><button class="key" data-k="0">0</button>
+            <button class="key" data-k="del" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.5H9.2c-.5 0-1 .22-1.34.6l-4 5c-.3.37-.3.9 0 1.28l4 5c.34.38.84.62 1.34.62H20a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 20 6.5Z"/><path d="M12.5 10.5l4 4M16.5 10.5l-4 4"/></svg></button>
+          </div>
+        </div>
+        <div class="kp-menu">
+          <div class="kp-item">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="M8 7.5h8" stroke-linecap="round"/><circle cx="8.5" cy="12" r=".5"/><circle cx="12" cy="12" r=".5"/><circle cx="15.5" cy="12" r=".5"/><circle cx="8.5" cy="16" r=".5"/><circle cx="12" cy="16" r=".5"/><circle cx="15.5" cy="16" r=".5"/></svg></span>
+            <span class="lbl">Show calculator</span>
+            <span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>
+          </div>
+          <div class="kp-item">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h10M14 5l3 3-3 3M17 16H7M10 13l-3 3 3 3"/></svg></span>
+            <span class="lbl">Invert keypad</span>
+          </div>
+          <div class="kp-item">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/></svg></span>
+            <span class="lbl">Whole digit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gen-slide" id="genPayment">
+      <div class="pay-widget">
+        <div class="pay-stage">
+          <canvas class="globe2" id="gGlobe"></canvas>
+          <div class="nfc-stack2">
+            <div class="nfc-icon2"><svg width="72" height="47" viewBox="0 0 72 47" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#nfc_clip1g)">
+<path d="M30.8004 46.0199C13.8141 46.0199 0 35.6967 0 23.0099C0 10.3232 13.8141 0 30.8004 0C44.142 0 55.9031 6.34621 60.0485 15.795C60.1693 16.0688 60.1768 16.3795 60.0692 16.6588C60.0159 16.7971 59.936 16.9235 59.834 17.0308C59.732 17.1381 59.6099 17.2243 59.4748 17.2843C59.3396 17.3443 59.194 17.377 59.0462 17.3805C58.8984 17.3841 58.7514 17.3584 58.6135 17.305C58.335 17.1971 58.1107 16.9827 57.9899 16.7089C54.1989 8.0611 43.2646 2.25643 30.8004 2.25643C15.0571 2.25643 2.24985 11.5642 2.24985 23.0099C2.24985 34.4557 15.0571 43.7635 30.8004 43.7635C39.8898 43.7635 48.2368 40.7116 53.6927 35.3921C53.9067 35.1834 54.1947 35.0685 54.4932 35.0728C54.7917 35.077 55.0763 35.2 55.2844 35.4147C55.4925 35.6294 55.6071 35.9182 55.6028 36.2176C55.5986 36.5169 55.476 36.8024 55.2619 37.0111C49.3842 42.7537 40.4973 46.0199 30.8004 46.0199Z" fill="#42413E"/>
+<path d="M70.8726 35.5117C70.6814 35.5121 70.4933 35.4636 70.326 35.3708C70.1587 35.2781 70.0177 35.144 69.9164 34.9815C66.1366 28.9004 59.837 18.9326 59.0215 18.0921L58.7684 17.8382C57.8066 16.868 56.8954 15.9485 55.9167 15.9485C54.4205 15.9485 50.0783 16.3321 50.0333 16.3377C49.8856 16.3507 49.7368 16.3343 49.5953 16.2896C49.4539 16.2449 49.3226 16.1727 49.209 16.0771C49.0954 15.9815 49.0017 15.8644 48.9333 15.7324C48.8648 15.6005 48.8229 15.4564 48.81 15.3082C48.797 15.1601 48.8133 15.0108 48.8579 14.8689C48.9025 14.7271 48.9745 14.5955 49.0698 14.4815C49.1652 14.3676 49.2819 14.2736 49.4135 14.2049C49.545 14.1363 49.6887 14.0942 49.8365 14.0813C50.0164 14.0813 54.3362 13.6864 55.9167 13.6864C57.8347 13.6864 59.179 15.0459 60.3658 16.2474L60.6132 16.4957C61.8169 17.6972 70.1751 31.1117 71.8287 33.7855C71.9353 33.9565 71.9942 34.1529 71.9994 34.3545C72.0045 34.556 71.9558 34.7552 71.8582 34.9314C71.7606 35.1076 71.6176 35.2544 71.4443 35.3564C71.271 35.4585 71.0735 35.5121 70.8726 35.5117Z" fill="#42413E"/>
+<path d="M61.7682 40.0715H61.6782C60.363 39.9331 59.0901 39.5261 57.9378 38.8756C56.3743 37.9196 55.0793 36.5801 54.1749 34.9832C53.7446 34.2264 53.3939 33.4267 53.1287 32.5971C52.7856 31.6494 52.3919 30.5719 51.9194 30.1488C51.447 29.7257 49.6696 28.2986 47.7685 26.7642L44.883 24.4231C42.0314 22.1047 40.6196 20.92 40.164 20.4744C38.4766 18.7821 38.4766 16.6667 40.164 14.9631C40.8727 14.2523 42.4644 13.2707 45.1474 14.7769L57.111 21.4277L56.0198 23.4021L44.0562 16.7118C42.4532 15.8205 41.9301 16.3508 41.7557 16.5256C40.7321 17.5523 41.1933 18.3026 41.7557 18.8441C42.3182 19.3857 45.3161 21.8452 46.3004 22.6462L49.1802 24.9816C51.2782 26.6739 52.9319 28.0221 53.4156 28.4509C54.3155 29.2519 54.788 30.555 55.2436 31.8355C55.4611 32.5156 55.7436 33.173 56.0873 33.7986C56.7995 35.0775 57.8231 36.1546 59.0627 36.9294C59.9319 37.4107 60.8879 37.7137 61.875 37.8207C62.1734 37.8319 62.4551 37.9615 62.6581 38.181C62.8612 38.4006 62.969 38.692 62.9578 38.9912C62.9466 39.2904 62.8173 39.5729 62.5985 39.7766C62.3796 39.9802 62.089 40.0883 61.7907 40.0771L61.7682 40.0715Z" fill="#42413E"/>
+<path d="M48.7854 31.6463C48.026 31.7069 47.2668 31.5274 46.6143 31.1329C46.4175 30.975 45.7763 30.5237 45.0957 30.0498C43.7393 29.1564 42.4359 28.1845 41.1922 27.139C40.0279 25.9713 39.8254 24.4313 40.6747 23.1903C41.7434 21.6559 43.1552 21.5318 43.8189 21.701L43.2564 23.8898C43.2171 23.8898 42.919 23.8898 42.4971 24.4539C42.4184 24.5667 42.1821 24.9052 42.7615 25.4862C43.2002 25.9262 45.1801 27.3139 46.3612 28.1431C47.1768 28.7073 47.6774 29.0626 47.9361 29.2714C48.9128 29.3747 49.8995 29.3252 50.8609 29.1247C51.1429 29.0336 51.4493 29.0578 51.7136 29.1919C51.978 29.326 52.1789 29.5593 52.2727 29.8411C52.3241 29.9825 52.3468 30.1327 52.3394 30.283C52.332 30.4333 52.2947 30.5806 52.2297 30.7162C52.1647 30.8518 52.0733 30.973 51.9609 31.0726C51.8486 31.1723 51.7174 31.2484 51.5753 31.2965C50.6591 31.5049 49.7246 31.6221 48.7854 31.6463Z" fill="#42413E"/>
+<path d="M51.2796 37.1493C49.8678 37.1493 45.3794 34.6503 44.935 34.3287C44.3345 33.9403 43.8962 33.3453 43.7025 32.6555C43.5088 31.9657 43.5731 31.2287 43.8832 30.5831C44.1184 30.052 44.4991 29.5988 44.9811 29.2763C45.463 28.9537 46.0263 28.775 46.6056 28.761C46.9039 28.761 47.19 28.8799 47.401 29.0914C47.612 29.303 47.7305 29.59 47.7305 29.8892C47.7305 30.1884 47.612 30.4754 47.401 30.687C47.19 30.8986 46.9039 31.0174 46.6056 31.0174C46.4598 31.0325 46.321 31.0873 46.204 31.1758C46.087 31.2643 45.9964 31.3831 45.9418 31.5195C45.8509 31.6793 45.8258 31.8685 45.8721 32.0467C45.9183 32.2248 46.0322 32.3777 46.1893 32.4728C46.9824 33.0031 50.5822 34.8082 51.3246 34.8928C52.3536 34.6174 53.348 34.2257 54.2888 33.7251C54.5566 33.5927 54.8658 33.5724 55.1485 33.6687C55.2885 33.7164 55.4177 33.7912 55.5288 33.889C55.64 33.9867 55.7308 34.1055 55.7962 34.2385C55.8616 34.3714 55.9002 34.516 55.9098 34.664C55.9195 34.8119 55.9 34.9603 55.8525 35.1007C55.8049 35.2411 55.7303 35.3707 55.6328 35.4822C55.5353 35.5936 55.4169 35.6847 55.2843 35.7503C54.4294 36.1734 52.3427 37.1493 51.2796 37.1493Z" fill="#42413E"/>
+<path d="M45.6753 24.8466C45.6116 24.852 45.5477 24.852 45.484 24.8466L37.1596 23.3968C36.4581 23.2742 35.8337 22.8774 35.4235 22.2937C35.0133 21.7099 34.8508 20.9867 34.9716 20.2829L36.5578 11.009C36.68 10.3054 37.0756 9.67924 37.6577 9.26784C38.2397 8.85645 38.9608 8.69345 39.6625 8.81462L48.9319 10.4223C49.6334 10.5449 50.2578 10.9417 50.668 11.5255C51.0782 12.1092 51.2407 12.8324 51.1199 13.5362L50.2818 18.3932C50.2606 18.5426 50.2097 18.6863 50.1322 18.8157C50.0546 18.9451 49.9519 19.0575 49.8302 19.1464C49.7085 19.2352 49.5703 19.2987 49.4237 19.333C49.2771 19.3673 49.1251 19.3717 48.9768 19.346C48.8285 19.3204 48.6868 19.2651 48.5601 19.1835C48.4335 19.1019 48.3245 18.9956 48.2395 18.871C48.1545 18.7464 48.0954 18.6059 48.0655 18.458C48.0357 18.31 48.0358 18.1575 48.0657 18.0096L48.9038 13.147C48.9235 13.0326 48.8972 12.915 48.8309 12.8199C48.7645 12.7248 48.6633 12.6599 48.5495 12.6393L39.3251 11.0316C39.2686 11.0212 39.2106 11.0223 39.1545 11.0349C39.0985 11.0475 39.0455 11.0713 38.9988 11.1049C38.9517 11.1376 38.9115 11.1794 38.8807 11.2278C38.8498 11.2762 38.8287 11.3303 38.8188 11.3869L37.2158 20.6383C37.1977 20.7525 37.2245 20.8693 37.2906 20.964C37.3567 21.0588 37.457 21.124 37.5702 21.146L45.8946 22.5958C46.193 22.6212 46.469 22.7645 46.6621 22.994C46.8551 23.2236 46.9493 23.5207 46.9239 23.8199C46.8986 24.1191 46.7557 24.396 46.5268 24.5896C46.2979 24.7831 46.0017 24.8776 45.7034 24.8522L45.6753 24.8466Z" fill="#42413E"/>
+<path d="M13.3082 27.7819C13.1011 27.7844 12.8974 27.7295 12.7194 27.6232C12.5415 27.517 12.3962 27.3635 12.2997 27.1797C12.2031 26.996 12.159 26.7891 12.1722 26.5818C12.1854 26.3745 12.2554 26.1749 12.3745 26.005C13.0204 25.0842 13.3669 23.9858 13.3669 22.8601C13.3669 21.7343 13.0204 20.636 12.3745 19.7152C12.2145 19.4703 12.1556 19.1725 12.2104 18.8849C12.2652 18.5973 12.4293 18.3423 12.6681 18.1738C12.907 18.0053 13.2017 17.9366 13.4902 17.9821C13.7786 18.0276 14.0381 18.1838 14.2138 18.4177C15.1271 19.719 15.6173 21.2715 15.6173 22.8629C15.6173 24.4542 15.1271 26.0067 14.2138 27.308C14.1108 27.4531 13.9751 27.5716 13.8177 27.654C13.6603 27.7363 13.4857 27.7802 13.3082 27.7819Z" fill="#42413E"/>
+<path d="M17.6708 30.0258C17.4707 30.0255 17.2742 29.9718 17.1017 29.87C16.9292 29.7682 16.7869 29.6222 16.6894 29.4468C16.592 29.2715 16.543 29.0733 16.5474 28.8726C16.5518 28.6719 16.6095 28.4761 16.7146 28.3052C17.7233 26.6677 18.2576 24.7808 18.2576 22.856C18.2576 20.9311 17.7233 19.0442 16.7146 17.4067C16.6201 17.2808 16.553 17.1366 16.5174 16.9831C16.4819 16.8297 16.4788 16.6705 16.5084 16.5158C16.5379 16.361 16.5994 16.2142 16.689 16.0848C16.7785 15.9554 16.8941 15.8462 17.0282 15.7643C17.1624 15.6824 17.3122 15.6295 17.4679 15.6092C17.6237 15.5888 17.7819 15.6014 17.9325 15.6461C18.0831 15.6909 18.2227 15.7667 18.3423 15.8688C18.462 15.9709 18.5589 16.097 18.627 16.239C19.8569 18.2339 20.5084 20.533 20.5084 22.8785C20.5084 25.224 19.8569 27.5231 18.627 29.5181C18.523 29.6765 18.3809 29.806 18.2138 29.8948C18.0466 29.9835 17.8599 30.0286 17.6708 30.0258Z" fill="#42413E"/>
+<path d="M22.2101 32.3718C22.0132 32.3706 21.8201 32.3176 21.65 32.2181C21.4799 32.1186 21.3389 31.976 21.241 31.8047C21.143 31.6334 21.0916 31.4393 21.0919 31.2419C21.0922 31.0444 21.1442 30.8505 21.2427 30.6794C22.624 28.3088 23.352 25.6124 23.352 22.8666C23.352 20.1208 22.624 17.4243 21.2427 15.0537C21.1546 14.9256 21.094 14.7806 21.0645 14.6279C21.035 14.4751 21.0373 14.3179 21.0713 14.1661C21.1053 14.0143 21.1702 13.8712 21.262 13.7458C21.3538 13.6204 21.4705 13.5153 21.6047 13.4373C21.7389 13.3593 21.8877 13.3099 22.0419 13.2924C22.196 13.2748 22.3521 13.2894 22.5003 13.3352C22.6486 13.3811 22.7858 13.4572 22.9033 13.5588C23.0208 13.6603 23.1161 13.7852 23.1832 13.9255C24.7672 16.6425 25.6021 19.7332 25.6021 22.8807C25.6021 26.0281 24.7672 29.1188 23.1832 31.8359C23.081 32.002 22.9377 32.1387 22.7671 32.2326C22.5966 32.3265 22.4047 32.3745 22.2101 32.3718Z" fill="#42413E"/>
+<path d="M26.9292 34.8013C26.7314 34.8021 26.5368 34.7505 26.3652 34.6518C26.1935 34.5531 26.0509 34.4108 25.9516 34.2391C25.8524 34.0675 25.8 33.8726 25.7998 33.6742C25.7996 33.4758 25.8516 33.2808 25.9505 33.109C27.7199 29.9792 28.6499 26.4429 28.6499 22.845C28.6499 19.2472 27.7199 15.7109 25.9505 12.5811C25.8767 12.4522 25.8288 12.31 25.8098 12.1625C25.7907 12.0151 25.8008 11.8653 25.8394 11.7218C25.9175 11.432 26.1072 11.1851 26.3667 11.0354C26.6263 10.8858 26.9345 10.8458 27.2235 10.924C27.5125 11.0023 27.7587 11.1926 27.9079 11.4529C29.8706 14.923 30.9023 18.8443 30.9023 22.8338C30.9023 26.8232 29.8706 30.7445 27.9079 34.2146C27.8117 34.391 27.6702 34.5384 27.4981 34.6415C27.3261 34.7447 27.1297 34.7998 26.9292 34.8013Z" fill="#42413E"/>
+</g>
+<defs>
+<clipPath id="nfc_clip1g">
+<rect width="71.9997" height="46.0199" fill="white"/>
+</clipPath>
+</defs>
+</svg></div>
+            <div class="instruction2">Hold your card to<br>the indicated area</div>
+            <div class="price-container2"><div class="price-shimmer2"><span class="price2">£7.40</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gen-slide" id="genQuick">
+      <div class="qa-widget" id="gQa">
+        <div class="qa-screen"><div class="qa-amount"><span class="qa-cur">£</span><span class="qa-val">0.00</span></div></div>
+        <div class="qa-actions">
+          <div class="qa-label">Quick actions</div>
+          <div class="qa-row">
+            <button class="qa-pill" type="button" data-add="5">+£5.00</button>
+            <button class="qa-pill" type="button" data-add="10">+£10.00</button>
+            <button class="qa-pill" type="button"><svg viewBox="0 0 20 20" fill="none"><path d="M5.6 2.75h4.5l4.55 4.55V15.6A2.15 2.15 0 0 1 12.5 17.75H5.6A2.15 2.15 0 0 1 3.45 15.6V4.9A2.15 2.15 0 0 1 5.6 2.75Z" stroke="currentColor" stroke-width="1.4"/><path d="M10 2.9V7.4h4.5" stroke="currentColor" stroke-width="1.4"/><path d="M6.8 11.1h5M6.8 13.5h3.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Add ref.</button>
+            <button class="qa-pill qa-pill-round" type="button" aria-label="More"><svg viewBox="0 0 20 20" fill="none"><path d="M10 4.6v10.8M4.6 10h10.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="screen scene hidden" id="screen" data-scene="amount">
   <div class="card" id="card">
     <div class="kp-top">
       <button class="kp-btn" id="btnLeft" aria-label="Teya"><svg viewBox="7 7 17 17" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.0492 9.77295H12.218C10.8677 9.77295 9.77271 10.868 9.77271 12.2184V19.0548C9.77271 20.4052 10.8677 21.5002 12.218 21.5002H19.0544C20.4047 21.5002 21.5 20.4052 21.5 19.0548V12.2184C21.4945 10.868 20.3995 9.77295 19.0492 9.77295ZM19.0443 14.7406C17.6977 14.7406 16.6085 15.8251 16.6085 17.1544V18.4992H14.5539V17.1544C14.5539 16.0805 14.94 15.0916 15.5786 14.3208C16.4048 13.3319 17.6493 12.7048 19.0443 12.7048V14.7406ZM12.1182 12.7098V14.7406C12.9443 14.7406 13.6741 15.1499 14.1194 15.7718C14.3179 15.0649 14.6721 14.4164 15.1441 13.8687C14.3446 13.151 13.2824 12.7098 12.1182 12.7098Z"/></svg></button>
@@ -412,12 +518,87 @@
   }
   cycle();
 })();
+
+// ── general scene: auto-cycling reel — amount → payment → quick actions, elegant crossfades ──
+(function(){
+  var slides={ amount:document.getElementById('genAmount'),
+               payment:document.getElementById('genPayment'),
+               quick:document.getElementById('genQuick') };
+  if(!slides.amount) return;
+  function ease(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }   // ease in-out
+  function makeRoller(el){ return function(from,to,dur,done){ var s=performance.now();
+    (function step(n){ var t=Math.min(1,(n-s)/dur);
+      el.textContent=(from+(to-from)*ease(t)).toFixed(2);
+      if(t<1) requestAnimationFrame(step); else done&&done(); })(s); }; }
+  function press(el,ms){ if(!el) return; el.classList.add('pressed');
+    setTimeout(function(){ el.classList.remove('pressed'); }, ms||180); }
+
+  // amount mini — type £10, calculator menu opens & closes
+  var kp=document.getElementById('gKp');
+  var kVal=kp.querySelector('.kp-val'), kAmt=kp.querySelector('.kp-amount'),
+      kMenu=kp.querySelector('.kp-menu'), kBtn=kp.querySelectorAll('.kp-btn')[1];
+  var kRoll=makeRoller(kVal), kKeys={};
+  [].forEach.call(kp.querySelectorAll('.key'), function(k){ kKeys[k.dataset.k]=k; });
+  var kT=[]; function kAt(ms,fn){ kT.push(setTimeout(fn,ms)); }
+  function kpShot(){
+    kT.forEach(clearTimeout); kT=[];
+    kAmt.classList.remove('entered'); kVal.textContent='0.00'; kMenu.classList.remove('open');
+    kAt(500,function(){ press(kKeys['1']); });
+    kAt(800,function(){ press(kKeys['0']); });
+    kAt(1100,function(){ press(kKeys['0']); });
+    kAt(1400,function(){ press(kKeys['0']); });
+    kAt(520,function(){ kAmt.classList.add('entered'); kRoll(0,10,1250); });
+    kAt(2550,function(){ press(kBtn,220); });
+    kAt(2700,function(){ kMenu.classList.add('open'); });
+    kAt(4350,function(){ kMenu.classList.remove('open'); });
+  }
+
+  // quick actions mini — +£10 rolls up, Add ref. drags to front, swaps back
+  var gq=document.getElementById('gQa');
+  var qVal=gq.querySelector('.qa-val'), qAmt=gq.querySelector('.qa-amount'), qRoll=makeRoller(qVal);
+  var qp=gq.querySelectorAll('.qa-pill'), q5=qp[0], q10=qp[1], qRef=qp[2];
+  var qT=[]; function qAt(ms,fn){ qT.push(setTimeout(fn,ms)); }
+  function qaShot(){
+    qT.forEach(clearTimeout); qT=[];
+    [q5,q10,qRef].forEach(function(p){ p.classList.add('noanim'); p.classList.remove('lifted'); p.style.translate=''; });
+    void gq.offsetWidth;
+    [q5,q10,qRef].forEach(function(p){ p.classList.remove('noanim'); });
+    qAmt.classList.remove('entered'); qVal.textContent='0.00';
+    qAt(600,function(){ press(q10,230); qAmt.classList.add('entered'); qRoll(0,10,780); });
+    qAt(2050,function(){
+      var gap=q10.offsetLeft-(q5.offsetLeft+q5.offsetWidth);
+      var tAdd=q5.offsetLeft-qRef.offsetLeft;
+      var shift=qRef.offsetWidth+gap;
+      qRef.classList.add('lifted'); qRef.style.translate='0px -7px';
+      qT.push(setTimeout(function(){
+        qRef.style.translate=tAdd+'px -7px'; q5.style.translate=shift+'px 0'; q10.style.translate=shift+'px 0';
+        qT.push(setTimeout(function(){ qRef.classList.remove('lifted'); qRef.style.translate=tAdd+'px 0'; },760));
+      },480));
+    });
+    qAt(5000,function(){
+      qRoll(10,0,720,function(){ qAmt.classList.remove('entered'); });
+      qRef.style.translate=''; q5.style.translate=''; q10.style.translate='';
+    });
+  }
+
+  var order=[ {k:'amount', shot:kpShot, dur:5400},
+              {k:'payment', shot:null,  dur:4600},
+              {k:'quick',  shot:qaShot, dur:6600} ];
+  var idx=0;
+  function reel(){
+    var cur=order[idx];
+    Object.keys(slides).forEach(function(k){ slides[k].classList.toggle('on', k===cur.k); });
+    if(cur.shot) cur.shot();
+    setTimeout(function(){ idx=(idx+1)%order.length; reel(); }, cur.dur);
+  }
+  reel();
+})();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // ── payment scene: the site's 3D particle globe (Fibonacci sphere + wave ripple), verbatim ──
-(function(){
-  var canvas=document.getElementById('globe2');
+function initGlobe(canvasId){
+  var canvas=document.getElementById(canvasId);
   if(!canvas || typeof THREE==='undefined') return;
   var W=393, H=852;                                   // phone screen coords, like the site
   canvas.width=W*2; canvas.height=H*2;                // retina
@@ -518,6 +699,8 @@
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
   })();
-})();
+}
+initGlobe('globe2');   // payment tab
+initGlobe('gGlobe');   // general reel slide
 </script>
 </body></html>
