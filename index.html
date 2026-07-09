@@ -12,7 +12,8 @@
   body{ display:flex; flex-direction:column; align-items:center; overflow:hidden; }
 
   /* scene tabs — top chrome, kept small so it stays outside the recording crop */
-  .tabs{ display:flex; gap:6px; padding:14px 0 10px; }
+  .tabs{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; padding:14px 12px 10px; }
+  .tab{ white-space:nowrap; }
   .tab{ font:inherit; font-size:13px; font-weight:600; letter-spacing:.01em; color:rgba(9,8,6,.55);
     background:rgba(95,79,48,.06); border:none; border-radius:99px; padding:7px 18px; cursor:pointer;
     transition:background .18s ease, color .18s ease; }
@@ -146,6 +147,39 @@
   .kpfit .kp-item .lbl{ font-size:13px; }
   .kpfit .kp-item .chk{ width:14px; height:14px; }
 
+  /* ---- POS integrations scene: radio cards, Integrated mode expands (same fixed 328×371) ---- */
+  .pos-widget{ width:328px; height:371px; border-radius:18px; background:#F6F5F3; position:relative;
+    overflow:hidden; container-type:inline-size; padding:12px; }
+  .pos-stack{ display:flex; flex-direction:column; gap:10px;
+    transition:translate .6s cubic-bezier(.25,.8,.25,1); }
+  .pos-stack.up{ translate:0 -24px; }   /* screen makes room when the card expands */
+  .pos-option{ background:#fff; border-radius:14px; padding:14px 16px; transition:scale .16s ease; }
+  .pos-option.pressed{ scale:.975; }
+  .pos-head{ display:flex; align-items:center; gap:12px; }
+  #posStandalone{ display:flex; align-items:center; gap:12px; }
+  .pos-txt{ flex:1; min-width:0; }
+  .pos-title{ font-size:15.5px; font-weight:600; color:rgba(9,8,6,.925); line-height:1.3; }
+  .pos-sub-txt{ font-size:13px; color:rgba(33,28,18,.5); line-height:1.35; margin-top:3px; }
+  .pos-radio{ width:20px; height:20px; border-radius:50%; background:#fff; flex:0 0 auto; position:relative;
+    box-shadow:inset 0 0 0 2px rgba(119,111,95,.3);
+    transition:box-shadow .25s ease, background .25s ease; }
+  .pos-radio::after{ content:''; position:absolute; inset:0; margin:auto; width:10px; height:10px;
+    border-radius:50%; background:#fff; scale:0; transition:scale .3s cubic-bezier(.3,1.5,.4,1); }
+  .pos-radio.sel{ background:#46520F; box-shadow:inset 0 0 0 2px #46520F; }
+  .pos-radio.sel::after{ scale:1; }
+  .pos-sub{ overflow:hidden; max-height:0; opacity:0;
+    transition:max-height .6s cubic-bezier(.25,.8,.25,1), opacity .45s ease; }
+  .pos-sub.on{ max-height:230px; opacity:1; }
+  .pos-row{ display:flex; align-items:center; gap:12px; padding:10px 0;
+    opacity:0; translate:0 8px; transition:opacity .45s ease, translate .5s cubic-bezier(.25,.8,.3,1); }
+  .pos-row.in{ opacity:1; translate:0 0; }
+  .pos-row .pos-title{ flex:1; font-weight:500; }
+  .pos-sub .pos-row:first-child{ margin-top:12px; }
+  .pos-sub .pos-row:first-child, .pos-receipt{ border-top:1px solid rgba(49,58,49,.08); }
+  .pos-receipt{ align-items:flex-start; }
+  .pos-receipt .pos-title{ font-weight:600; }
+  .pos-receipt .qas-toggle{ margin-top:2px; }
+
   /* amount tab — same fixed card as the other tabs; the dropdown pops outside the card */
   .amt-wrap{ position:relative; }
   .amt-wrap .card{ position:relative; left:auto; top:auto; width:328px; height:371px;
@@ -209,6 +243,7 @@
   <button class="tab" data-scene="amount">Amount</button>
   <button class="tab" data-scene="payment">Payment</button>
   <button class="tab" data-scene="quick">Quick actions</button>
+  <button class="tab" data-scene="pos">POS integrations</button>
 </nav>
 <div class="stage">
 <div class="scene gen-scene" data-scene="general">
@@ -416,6 +451,40 @@
     </div>
   </div>
 </div>
+
+<div class="scene pos-scene hidden" data-scene="pos">
+  <div class="pos-widget" id="pos1">
+    <div class="pos-stack" id="posStack">
+      <div class="pos-option" id="posStandalone">
+        <div class="pos-txt">
+          <div class="pos-title">Standalone mode</div>
+          <div class="pos-sub-txt">Use this device as a standalone card machine with no integrations.</div>
+        </div>
+        <span class="pos-radio sel"></span>
+      </div>
+      <div class="pos-option" id="posIntegrated">
+        <div class="pos-head">
+          <div class="pos-txt">
+            <div class="pos-title">Integrated mode</div>
+            <div class="pos-sub-txt">Connect your ePOS for integrated payments</div>
+          </div>
+          <span class="pos-radio"></span>
+        </div>
+        <div class="pos-sub" id="posSub">
+          <div class="pos-row"><span class="pos-title">Pay at Counter</span><span class="pos-radio sel"></span></div>
+          <div class="pos-row"><span class="pos-title">Pay at Table</span><span class="pos-radio"></span></div>
+          <div class="pos-row pos-receipt">
+            <div class="pos-txt">
+              <div class="pos-title">Let customers print a receipt</div>
+              <div class="pos-sub-txt">Receipts are always offered for Dynamic Currency Conversion transactions.</div>
+            </div>
+            <span class="qas-toggle on"><span class="qas-knob"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -611,6 +680,40 @@
     setTimeout(function(){ idx=(idx+1)%order.length; reel(); }, cur.dur);
   }
   reel();
+})();
+
+// ── POS integrations scene: Integrated mode radio gets selected → card expands with sub-options ──
+(function(){
+  var stack=document.getElementById('posStack'); if(!stack) return;
+  var standRadio=document.querySelector('#posStandalone .pos-radio');
+  var integ=document.getElementById('posIntegrated');
+  var integRadio=integ.querySelector('.pos-head .pos-radio');
+  var sub=document.getElementById('posSub');
+  var rows=sub.querySelectorAll('.pos-row');
+  var timers=[];
+  function at(ms,fn){ timers.push(setTimeout(fn,ms)); }
+  function reset(){
+    timers.forEach(clearTimeout); timers=[];
+    standRadio.classList.add('sel'); integRadio.classList.remove('sel');
+    sub.classList.remove('on'); stack.classList.remove('up');
+    [].forEach.call(rows, function(r){ r.classList.remove('in'); });
+    integ.classList.remove('pressed');
+  }
+  function cycle(){
+    reset();
+    at(1300, function(){ integ.classList.add('pressed');
+      setTimeout(function(){ integ.classList.remove('pressed'); }, 200); });   // card tapped…
+    at(1450, function(){ standRadio.classList.remove('sel'); integRadio.classList.add('sel'); });   // …radio swaps
+    at(1900, function(){ sub.classList.add('on'); stack.classList.add('up'); });   // card expands
+    [].forEach.call(rows, function(r,i){                                        // sub-items fade in one by one
+      at(2200 + i*160, function(){ r.classList.add('in'); });
+    });
+    at(6800, function(){ sub.classList.remove('on'); stack.classList.remove('up');
+      [].forEach.call(rows, function(r){ r.classList.remove('in'); }); });      // graceful collapse
+    at(7500, function(){ integRadio.classList.remove('sel'); standRadio.classList.add('sel'); });   // back to standalone
+    at(9000, cycle);
+  }
+  cycle();
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
