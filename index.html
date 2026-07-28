@@ -224,25 +224,34 @@
   /* ---- MOTO scene: pick method next to Charge → manual card entry (fixed 328×371) ---- */
   .mo-widget{ width:328px; height:371px; border-radius:18px; background:#fff; position:relative; overflow:hidden;
     box-shadow:0 6px 14px -4px rgba(0,0,0,.05), 0 15px 34px -10px rgba(0,0,0,.06); }
-  .mo-view{ position:absolute; inset:0; padding:18px; display:flex; flex-direction:column; }
+  .mo-view{ position:absolute; inset:0; padding:16px 18px; display:flex; flex-direction:column; }
   .mo-viewA{ transition:transform .55s cubic-bezier(.3,.8,.25,1), opacity .4s ease; }
   .mo-viewA.away{ transform:translateX(-16%); opacity:0; }
-  .mo-amountwrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .mo-amount{ font-size:40px; font-weight:600; letter-spacing:-.5px; color:#29320C; font-variant-numeric:tabular-nums; }
-  .mo-amount-sub{ font-size:13px; color:rgba(22,20,14,.55); margin-top:4px; }
-  .mo-actions{ display:flex; gap:8px; }
-  .mo-chip{ height:46px; border-radius:14px; background:rgba(95,79,48,.05); border:none; padding:0 12px;
-    display:flex; align-items:center; font:inherit; cursor:pointer;
-    transition:transform .15s ease, background .15s ease; }
-  .mo-chip.pressed{ transform:scale(.95); background:rgba(95,79,48,.12); }
-  .mo-chip-inner{ display:flex; align-items:center; gap:7px; font-size:13.5px; font-weight:600;
-    color:rgba(9,8,6,.925); transition:opacity .18s ease; }
+  /* view A mirrors the Amount tab: top buttons, amount, keypad — then method + charge, both lime */
+  .mo-kptop{ display:flex; justify-content:space-between; }
+  .mo-kbtn{ width:32px; height:32px; border-radius:50%; border:none; padding:0; background:rgba(95,79,48,.05);
+    color:rgba(9,8,6,.925); display:flex; align-items:center; justify-content:center; }
+  .mo-kbtn svg{ width:16px; height:16px; }
+  .mo-kpamount{ flex:1; display:flex; align-items:center; justify-content:center; gap:2px;
+    font-size:34px; font-weight:600; letter-spacing:-.03em; color:#29320C; font-variant-numeric:tabular-nums; }
+  .mo-kppad{ display:grid; grid-template-columns:repeat(3,1fr); gap:5px 8px; }
+  .mo-kkey{ width:56px; height:35px; justify-self:center; border:none; background:transparent; border-radius:99px;
+    font:inherit; font-size:17.5px; font-weight:500; color:rgba(9,8,6,.925); font-variant-numeric:tabular-nums;
+    display:flex; align-items:center; justify-content:center; }
+  .mo-kkey svg{ width:19px; height:19px; }
+  .mo-actions{ display:flex; gap:8px; margin-top:12px; }
+  .mo-chip{ width:46px; height:46px; border-radius:14px; background:#E1E51A; border:none; padding:0; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center; font:inherit; cursor:pointer;
+    transition:transform .15s ease, filter .15s ease; }
+  .mo-chip.pressed{ transform:scale(.95); filter:brightness(.96); }
+  .mo-chip-inner{ display:flex; align-items:center; justify-content:center; transition:opacity .18s ease; }
   .mo-chip-inner.fade{ opacity:0; }
-  .mo-chip-inner svg{ width:20px; height:20px; }
+  .mo-chip-inner svg{ width:22px; height:22px; }
   .mo-charge{ flex:1; height:46px; border-radius:14px; border:none; background:#E1E51A; color:#29320C;
     font:inherit; font-size:14.5px; font-weight:600; cursor:pointer;
     transition:transform .15s ease, filter .15s ease; }
   .mo-charge.pressed{ transform:scale(.97); filter:brightness(.96); }
+  .mo-cvvic{ margin-left:auto; width:20px; height:20px; flex:0 0 auto; }
   .mo-dim{ position:absolute; inset:0; background:rgba(20,18,12,.28); opacity:0; pointer-events:none;
     transition:opacity .4s ease; z-index:5; }
   .mo-dim.on{ opacity:1; }
@@ -627,15 +636,30 @@
   <div class="mo-widget" id="mo1">
 
     <div class="mo-view mo-viewA" id="moViewA">
-      <div class="mo-amountwrap">
-        <div class="mo-amount">£100.00</div>
-        <div class="mo-amount-sub">Ready to charge</div>
+      <div class="mo-kptop">
+        <button class="mo-kbtn" type="button" aria-label="Teya"><svg viewBox="7 7 17 17" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.0492 9.77295H12.218C10.8677 9.77295 9.77271 10.868 9.77271 12.2184V19.0548C9.77271 20.4052 10.8677 21.5002 12.218 21.5002H19.0544C20.4047 21.5002 21.5 20.4052 21.5 19.0548V12.2184C21.4945 10.868 20.3995 9.77295 19.0492 9.77295ZM19.0443 14.7406C17.6977 14.7406 16.6085 15.8251 16.6085 17.1544V18.4992H14.5539V17.1544C14.5539 16.0805 14.94 15.0916 15.5786 14.3208C16.4048 13.3319 17.6493 12.7048 19.0443 12.7048V14.7406ZM12.1182 12.7098V14.7406C12.9443 14.7406 13.6741 15.1499 14.1194 15.7718C14.3179 15.0649 14.6721 14.4164 15.1441 13.8687C14.3446 13.151 13.2824 12.7098 12.1182 12.7098Z"/></svg></button>
+        <button class="mo-kbtn" type="button" aria-label="Calculator"><svg viewBox="7 7 17 17" fill="currentColor"><path d="M14.1703 17.917C14.62 17.917 14.9847 18.2817 14.9847 18.7314C14.9847 19.1812 14.62 19.5458 14.1703 19.5458C13.7205 19.5458 13.3559 19.1812 13.3559 18.7314C13.3559 18.2817 13.7205 17.917 14.1703 17.917Z"/><path d="M17.1021 17.917C17.5518 17.917 17.9165 18.2817 17.9165 18.7314C17.9165 19.1812 17.5518 19.5458 17.1021 19.5458C16.6524 19.5458 16.2877 19.1812 16.2877 18.7314C16.2877 18.2817 16.6524 17.917 17.1021 17.917Z"/><path d="M14.1703 14.9852C14.62 14.9852 14.9847 15.3499 14.9847 15.7996C14.9847 16.2494 14.62 16.614 14.1703 16.614C13.7205 16.614 13.3559 16.2493 13.3559 15.7996C13.3559 15.3499 13.7205 14.9852 14.1703 14.9852Z"/><path d="M17.1021 14.9852C17.5518 14.9852 17.9165 15.3499 17.9165 15.7996C17.9165 16.2494 17.5518 16.614 17.1021 16.614C16.6524 16.614 16.2877 16.2494 16.2877 15.7996C16.2877 15.3499 16.6524 14.9852 17.1021 14.9852Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18.2423 9.12158C19.6816 9.12158 20.8483 10.2884 20.8483 11.7276V19.5458C20.8483 20.9851 19.6816 22.1519 18.2423 22.1519H13.0301C11.5909 22.1519 10.4241 20.9852 10.4241 19.5458V11.7276C10.4241 10.2884 11.5908 9.12158 13.0301 9.12158H18.2423ZM11.7271 19.5458C11.7271 20.2655 12.3105 20.8489 13.0301 20.8489H18.2423C18.9619 20.8489 19.5453 20.2655 19.5453 19.5458V13.6822H11.7271V19.5458ZM13.0301 10.4246C12.3105 10.4246 11.7271 11.008 11.7271 11.7276V12.3792H19.5453V11.7276C19.5453 11.008 18.9619 10.4246 18.2423 10.4246H13.0301Z"/></svg></button>
+      </div>
+      <div class="mo-kpamount"><span>£</span><span>100.00</span></div>
+      <div class="mo-kppad">
+        <button class="mo-kkey" type="button">1</button>
+        <button class="mo-kkey" type="button">2</button>
+        <button class="mo-kkey" type="button">3</button>
+        <button class="mo-kkey" type="button">4</button>
+        <button class="mo-kkey" type="button">5</button>
+        <button class="mo-kkey" type="button">6</button>
+        <button class="mo-kkey" type="button">7</button>
+        <button class="mo-kkey" type="button">8</button>
+        <button class="mo-kkey" type="button">9</button>
+        <button class="mo-kkey" type="button">00</button>
+        <button class="mo-kkey" type="button">0</button>
+        <button class="mo-kkey" type="button" aria-label="Delete"><svg viewBox="214.58 496.09 18.84 14.08" fill="currentColor"><path d="M231.066 496.091C231.689 496.091 232.286 496.338 232.726 496.778C233.165 497.218 233.412 497.815 233.412 498.437V507.818C233.412 508.44 233.165 509.037 232.726 509.477C232.286 509.916 231.689 510.164 231.066 510.164H220.903C220.678 510.164 220.463 510.066 220.315 509.896L214.842 503.643C214.584 503.348 214.584 502.907 214.842 502.612L220.315 496.357C220.463 496.188 220.678 496.091 220.903 496.091H231.066ZM216.469 503.127L221.258 508.6H231.066C231.274 508.6 231.473 508.518 231.619 508.371C231.766 508.225 231.849 508.026 231.849 507.818V498.437C231.849 498.229 231.766 498.03 231.619 497.884C231.473 497.737 231.274 497.654 231.066 497.654H221.258L216.469 503.127ZM228.168 500.229C228.473 499.923 228.969 499.923 229.274 500.229C229.58 500.534 229.58 501.03 229.274 501.335L227.482 503.127L229.274 504.92C229.58 505.225 229.579 505.72 229.274 506.025C228.969 506.331 228.473 506.331 228.168 506.025L226.375 504.232L224.583 506.025C224.278 506.331 223.783 506.331 223.478 506.025C223.172 505.72 223.172 505.225 223.478 504.92L225.27 503.127L223.478 501.335C223.172 501.03 223.172 500.534 223.478 500.229C223.783 499.924 224.278 499.924 224.583 500.229L226.375 502.021L228.168 500.229Z"/></svg></button>
       </div>
       <div class="mo-actions">
         <button class="mo-chip" id="moChip" type="button" aria-label="Payment method">
-          <span class="mo-chip-inner" id="moChipInner"><svg viewBox="0 0 24 24" fill="#29320C"><path d="M10 13C10.5523 13 11 13.4477 11 14C11 14.5523 10.5523 15 10 15H7C6.44772 15 6 14.5523 6 14C6 13.4477 6.44772 13 7 13H10Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18 4C20.2092 4 22 5.79088 22 8V16C22 18.2092 20.2092 20 18 20H6C3.79088 20 2 18.2092 2 16V8C2 5.79087 3.79087 4 6 4H18ZM4 16C4 17.1046 4.89542 18 6 18H18C19.1046 18 20 17.1046 20 16V11H4V16ZM6 6C4.89543 6 4 6.89543 4 8V9H20V8C20 6.89542 19.1046 6 18 6H6Z"/></svg>Card</span>
+          <span class="mo-chip-inner" id="moChipInner"><svg viewBox="0 0 24 24" fill="#29320C"><path d="M10 13C10.5523 13 11 13.4477 11 14C11 14.5523 10.5523 15 10 15H7C6.44772 15 6 14.5523 6 14C6 13.4477 6.44772 13 7 13H10Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18 4C20.2092 4 22 5.79088 22 8V16C22 18.2092 20.2092 20 18 20H6C3.79088 20 2 18.2092 2 16V8C2 5.79087 3.79087 4 6 4H18ZM4 16C4 17.1046 4.89542 18 6 18H18C19.1046 18 20 17.1046 20 16V11H4V16ZM6 6C4.89543 6 4 6.89543 4 8V9H20V8C20 6.89542 19.1046 6 18 6H6Z"/></svg></span>
         </button>
-        <button class="mo-charge" id="moCharge" type="button">Charge £100.00</button>
+        <button class="mo-charge" id="moCharge" type="button">Charge</button>
       </div>
     </div>
 
@@ -654,11 +678,11 @@
           </div>
           <div>
             <div class="mo-flabel">CVV</div>
-            <div class="mo-field" id="moFCvv"><span id="moCvvTxt"></span><span class="mo-caret"></span></div>
+            <div class="mo-field" id="moFCvv"><span id="moCvvTxt"></span><span class="mo-caret"></span><svg class="mo-cvvic" viewBox="0 0 24 24" fill="rgba(22,20,14,.55)"><path d="M10 13C10.5523 13 11 13.4477 11 14C11 14.5523 10.5523 15 10 15H7C6.44772 15 6 14.5523 6 14C6 13.4477 6.44772 13 7 13H10Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18 4C20.2092 4 22 5.79088 22 8V16C22 18.2092 20.2092 20 18 20H6C3.79088 20 2 18.2092 2 16V8C2 5.79087 3.79087 4 6 4H18ZM4 16C4 17.1046 4.89542 18 6 18H18C19.1046 18 20 17.1046 20 16V11H4V16ZM6 6C4.89543 6 4 6.89543 4 8V9H20V8C20 6.89542 19.1046 6 18 6H6Z"/></svg></div>
           </div>
         </div>
       </div>
-      <button class="mo-bcharge" id="moBCharge" type="button">Charge £100.00</button>
+      <button class="mo-bcharge" id="moBCharge" type="button">Charge</button>
     </div>
 
     <div class="mo-dim" id="moDim"></div>
@@ -981,7 +1005,7 @@
       cvvTxt=document.getElementById('moCvvTxt'), mc=document.getElementById('moMc'),
       bCharge=document.getElementById('moBCharge');
   var CARD_HTML=chipInner.innerHTML;
-  var MOTO_HTML=document.querySelector('#moOptMoto .ic svg').outerHTML+'MOTO';
+  var MOTO_HTML=document.querySelector('#moOptMoto .ic svg').outerHTML;   // icon only, like the design
   var NUM='9876 6543 3219 1234', EXP='12 / 28', CVV='876';
   var timers=[];
   function at(ms,fn){ timers.push(setTimeout(fn,ms)); }
