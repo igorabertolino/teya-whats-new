@@ -221,6 +221,70 @@
   .tip-key.ok svg{ width:22px; height:22px; }
   .tip-key.ok.pressed{ transform:scale(.9); background:#d6da15; }
 
+  /* ---- MOTO scene: pick method next to Charge → manual card entry (fixed 328×371) ---- */
+  .mo-widget{ width:328px; height:371px; border-radius:18px; background:#fff; position:relative; overflow:hidden;
+    box-shadow:0 6px 14px -4px rgba(0,0,0,.05), 0 15px 34px -10px rgba(0,0,0,.06); }
+  .mo-view{ position:absolute; inset:0; padding:18px; display:flex; flex-direction:column; }
+  .mo-viewA{ transition:transform .55s cubic-bezier(.3,.8,.25,1), opacity .4s ease; }
+  .mo-viewA.away{ transform:translateX(-16%); opacity:0; }
+  .mo-amountwrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .mo-amount{ font-size:40px; font-weight:600; letter-spacing:-.5px; color:#29320C; font-variant-numeric:tabular-nums; }
+  .mo-amount-sub{ font-size:13px; color:rgba(22,20,14,.55); margin-top:4px; }
+  .mo-actions{ display:flex; gap:8px; }
+  .mo-chip{ height:46px; border-radius:14px; background:rgba(95,79,48,.05); border:none; padding:0 12px;
+    display:flex; align-items:center; font:inherit; cursor:pointer;
+    transition:transform .15s ease, background .15s ease; }
+  .mo-chip.pressed{ transform:scale(.95); background:rgba(95,79,48,.12); }
+  .mo-chip-inner{ display:flex; align-items:center; gap:7px; font-size:13.5px; font-weight:600;
+    color:rgba(9,8,6,.925); transition:opacity .18s ease; }
+  .mo-chip-inner.fade{ opacity:0; }
+  .mo-chip-inner svg{ width:20px; height:20px; }
+  .mo-charge{ flex:1; height:46px; border-radius:14px; border:none; background:#E1E51A; color:#29320C;
+    font:inherit; font-size:14.5px; font-weight:600; cursor:pointer;
+    transition:transform .15s ease, filter .15s ease; }
+  .mo-charge.pressed{ transform:scale(.97); filter:brightness(.96); }
+  .mo-dim{ position:absolute; inset:0; background:rgba(20,18,12,.28); opacity:0; pointer-events:none;
+    transition:opacity .4s ease; z-index:5; }
+  .mo-dim.on{ opacity:1; }
+  .mo-sheet{ position:absolute; left:0; right:0; bottom:0; z-index:6; background:#fff;
+    border-radius:18px 18px 0 0; padding:14px 16px 16px; transform:translateY(105%);
+    transition:transform .55s cubic-bezier(.25,.9,.3,1); box-shadow:0 -8px 30px rgba(20,18,12,.14); }
+  .mo-sheet.on{ transform:translateY(0); }
+  .mo-sheet-title{ font-size:19px; font-weight:600; color:rgba(9,8,6,.925); }
+  .mo-sheet-label{ font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+    color:rgba(33,28,18,.4); margin-top:4px; }
+  .mo-opt{ display:flex; align-items:center; gap:11px; border:1.5px solid rgba(49,58,49,.1); border-radius:14px;
+    padding:8px 12px; margin-top:8px; background:#fff;
+    transition:background .25s ease, border-color .25s ease, transform .15s ease; }
+  .mo-opt.pressed{ transform:scale(.98); }
+  .mo-opt.sel{ background:#F7F7E4; border-color:#1D1C1A; }
+  .mo-opt .ic{ width:34px; height:34px; border-radius:10px; background:#F6F5F1; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center; }
+  .mo-opt .ic svg{ width:19px; height:19px; }
+  .mo-opt .lbl{ font-size:14px; font-weight:500; color:rgba(9,8,6,.925); }
+  .mo-viewB{ transform:translateX(105%); transition:transform .55s cubic-bezier(.3,.8,.25,1);
+    background:#fff; z-index:4; }
+  .mo-viewB.on{ transform:translateX(0); }
+  .mo-b-amount{ font-size:22px; font-weight:600; color:rgba(9,8,6,.925); font-variant-numeric:tabular-nums; }
+  .mo-b-sub{ font-size:12.5px; color:rgba(22,20,14,.55); margin-top:1px; }
+  .mo-form{ background:#F6F5F1; border-radius:16px; padding:12px; margin-top:12px; }
+  .mo-flabel{ font-size:12px; color:rgba(22,20,14,.6); margin:0 0 5px 2px; }
+  .mo-field{ background:#fff; border:1.5px solid rgba(49,58,49,.08); border-radius:10px; height:38px;
+    display:flex; align-items:center; padding:0 10px; font-size:14.5px; color:rgba(9,8,6,.925);
+    font-variant-numeric:tabular-nums; transition:border-color .25s ease; }
+  .mo-field.focus{ border-color:#1D1C1A; }
+  .mo-caret{ display:none; width:2px; height:16px; border-radius:1px; background:#29320c; margin-left:2px; }
+  .mo-field.focus .mo-caret{ display:inline-block; animation:tipBlink 1.1s steps(1) infinite; }
+  .mo-mc{ margin-left:auto; width:26px; height:26px; opacity:0; scale:.4;
+    transition:opacity .3s ease, scale .35s cubic-bezier(.3,1.4,.4,1); }
+  .mo-mc.on{ opacity:1; scale:1; }
+  .mo-row2f{ display:flex; gap:10px; margin-top:10px; }
+  .mo-row2f > div{ flex:1; }
+  .mo-bcharge{ margin-top:auto; height:44px; border-radius:14px; border:none; background:#E1E51A; color:#29320C;
+    font:inherit; font-size:14.5px; font-weight:600; cursor:pointer;
+    transition:transform .15s ease, filter .15s ease; }
+  .mo-bcharge.pressed{ transform:scale(.97); filter:brightness(.96); }
+
   /* amount tab — same fixed card as the other tabs; the dropdown pops outside the card */
   .amt-wrap{ position:relative; }
   .amt-wrap .card{ position:relative; left:auto; top:auto; width:328px; height:371px;
@@ -286,6 +350,7 @@
   <button class="tab" data-scene="quick">Quick actions</button>
   <button class="tab" data-scene="pos">POS integrations</button>
   <button class="tab" data-scene="tip">Custom tip</button>
+  <button class="tab" data-scene="moto">MOTO</button>
 </nav>
 <div class="stage">
 <div class="scene gen-scene" data-scene="general">
@@ -555,6 +620,65 @@
       <button class="tip-key" data-k="0" type="button">0</button>
       <button class="tip-key ok" data-k="ok" type="button" aria-label="Confirm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 6.5"/></svg></button>
     </div>
+  </div>
+</div>
+
+<div class="scene mo-scene hidden" data-scene="moto">
+  <div class="mo-widget" id="mo1">
+
+    <div class="mo-view mo-viewA" id="moViewA">
+      <div class="mo-amountwrap">
+        <div class="mo-amount">£100.00</div>
+        <div class="mo-amount-sub">Ready to charge</div>
+      </div>
+      <div class="mo-actions">
+        <button class="mo-chip" id="moChip" type="button" aria-label="Payment method">
+          <span class="mo-chip-inner" id="moChipInner"><svg viewBox="0 0 24 24" fill="#29320C"><path d="M10 13C10.5523 13 11 13.4477 11 14C11 14.5523 10.5523 15 10 15H7C6.44772 15 6 14.5523 6 14C6 13.4477 6.44772 13 7 13H10Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18 4C20.2092 4 22 5.79088 22 8V16C22 18.2092 20.2092 20 18 20H6C3.79088 20 2 18.2092 2 16V8C2 5.79087 3.79087 4 6 4H18ZM4 16C4 17.1046 4.89542 18 6 18H18C19.1046 18 20 17.1046 20 16V11H4V16ZM6 6C4.89543 6 4 6.89543 4 8V9H20V8C20 6.89542 19.1046 6 18 6H6Z"/></svg>Card</span>
+        </button>
+        <button class="mo-charge" id="moCharge" type="button">Charge £100.00</button>
+      </div>
+    </div>
+
+    <div class="mo-view mo-viewB" id="moViewB">
+      <div class="mo-b-amount">£100.00</div>
+      <div class="mo-b-sub">Manual entry</div>
+      <div class="mo-form">
+        <div class="mo-flabel">Card number</div>
+        <div class="mo-field" id="moFNum"><span id="moNumTxt"></span><span class="mo-caret"></span>
+          <svg class="mo-mc" id="moMc" viewBox="0 0 24 24" fill="none"><path d="M14.9765 7.33234H9.02603V17.1288H14.9765V7.33234Z" fill="#FF5F00"/><path d="M9.63893 12.2314C9.63819 11.2881 9.85034 10.357 10.2593 9.50853C10.6683 8.66007 11.2634 7.91649 11.9995 7.33408C11.0878 6.6118 9.99278 6.16265 8.83974 6.03798C7.6867 5.91331 6.52212 6.11813 5.4791 6.62905C4.43608 7.13997 3.55671 7.93636 2.94148 8.92721C2.32626 9.91806 2 11.0634 2 12.2323C2 13.4012 2.32626 14.5465 2.94148 15.5374C3.55671 16.5282 4.43608 17.3246 5.4791 17.8355C6.52212 18.3465 7.6867 18.5513 8.83974 18.4266C9.99278 18.3019 11.0878 17.8528 11.9995 17.1305C11.2632 16.5479 10.6679 15.8041 10.2589 14.9553C9.84995 14.1065 9.63793 13.175 9.63893 12.2314V12.2314Z" fill="#EB001B"/><path d="M22 12.2314C22 13.4004 21.6736 14.5458 21.0583 15.5367C20.443 16.5276 19.5635 17.324 18.5203 17.8348C17.4772 18.3457 16.3125 18.5504 15.1594 18.4255C14.0063 18.3007 12.9113 17.8513 11.9995 17.1288C12.7354 16.5459 13.3303 15.8021 13.7394 14.9536C14.1485 14.1051 14.3611 13.174 14.3611 12.2306C14.3611 11.2872 14.1485 10.3561 13.7394 9.50758C13.3303 8.65907 12.7354 7.91529 11.9995 7.33235C12.9113 6.60985 14.0063 6.16049 15.1594 6.03564C16.3125 5.91078 17.4772 6.11548 18.5203 6.62632C19.5635 7.13717 20.443 7.93354 21.0583 8.92443C21.6736 9.91531 22 11.0607 22 12.2297V12.2314Z" fill="#F79E1B"/></svg>
+        </div>
+        <div class="mo-row2f">
+          <div>
+            <div class="mo-flabel">Expiry</div>
+            <div class="mo-field" id="moFExp"><span id="moExpTxt"></span><span class="mo-caret"></span></div>
+          </div>
+          <div>
+            <div class="mo-flabel">CVV</div>
+            <div class="mo-field" id="moFCvv"><span id="moCvvTxt"></span><span class="mo-caret"></span></div>
+          </div>
+        </div>
+      </div>
+      <button class="mo-bcharge" id="moBCharge" type="button">Charge £100.00</button>
+    </div>
+
+    <div class="mo-dim" id="moDim"></div>
+    <div class="mo-sheet" id="moSheet">
+      <div class="mo-sheet-title">Select method</div>
+      <div class="mo-sheet-label">Charge £100.00</div>
+      <div class="mo-opt" id="moOptCard">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="#29320C"><path d="M10 13C10.5523 13 11 13.4477 11 14C11 14.5523 10.5523 15 10 15H7C6.44772 15 6 14.5523 6 14C6 13.4477 6.44772 13 7 13H10Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M18 4C20.2092 4 22 5.79088 22 8V16C22 18.2092 20.2092 20 18 20H6C3.79088 20 2 18.2092 2 16V8C2 5.79087 3.79087 4 6 4H18ZM4 16C4 17.1046 4.89542 18 6 18H18C19.1046 18 20 17.1046 20 16V11H4V16ZM6 6C4.89543 6 4 6.89543 4 8V9H20V8C20 6.89542 19.1046 6 18 6H6Z"/></svg></span>
+        <span class="lbl">Card</span>
+      </div>
+      <div class="mo-opt" id="moOptSplit">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="rgba(9,8,6,.925)"><path d="M9 3.00003C9.55228 3.00003 10 3.44775 10 4.00003C10 4.55232 9.55228 5.00003 9 5.00003H6.41406L12 10.586L17.5859 5.00003H15C14.4477 5.00003 14 4.55232 14 4.00003C14 3.44775 14.4477 3.00003 15 3.00003H20L20.1025 3.00491C20.6067 3.05624 21 3.48235 21 4.00003V9.00003C21 9.55232 20.5523 10 20 10C19.4477 10 19 9.55232 19 9.00003V6.41409L13 12.4141V20C13 20.5523 12.5523 21 12 21C11.4477 21 11 20.5523 11 20V12.4141L5 6.41409V9.00003C5 9.55232 4.55228 10 4 10C3.44772 10 3 9.55232 3 9.00003V4.00003C3 3.44775 3.44772 3.00003 4 3.00003H9Z"/></svg></span>
+        <span class="lbl">Split bill</span>
+      </div>
+      <div class="mo-opt" id="moOptMoto">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="rgba(9,8,6,.925)"><path d="M12 18C13.1046 18 14 18.8954 14 20C14 21.1046 13.1046 22 12 22C10.8954 22 10 21.1046 10 20C10 18.8954 10.8954 18 12 18Z"/><path d="M6 12.6006C7.10457 12.6006 8 13.496 8 14.6006C7.99974 15.7049 7.10441 16.6006 6 16.6006C4.89559 16.6006 4.00026 15.7049 4 14.6006C4 13.496 4.89543 12.6006 6 12.6006Z"/><path d="M12 12.6006C13.1046 12.6006 14 13.496 14 14.6006C13.9997 15.7049 13.1044 16.6006 12 16.6006C10.8956 16.6006 10.0003 15.7049 10 14.6006C10 13.496 10.8954 12.6006 12 12.6006Z"/><path d="M18 12.6006C19.1046 12.6006 20 13.496 20 14.6006C19.9997 15.7049 19.1044 16.6006 18 16.6006C16.8956 16.6006 16.0003 15.7049 16 14.6006C16 13.496 16.8954 12.6006 18 12.6006Z"/><path d="M6 7.2998C7.10457 7.2998 8 8.19524 8 9.2998C8 10.4044 7.10457 11.2998 6 11.2998C4.89543 11.2998 4 10.4044 4 9.2998C4 8.19524 4.89543 7.2998 6 7.2998Z"/><path d="M12 7.2998C13.1046 7.2998 14 8.19524 14 9.2998C14 10.4044 13.1046 11.2998 12 11.2998C10.8954 11.2998 10 10.4044 10 9.2998C10 8.19524 10.8954 7.2998 12 7.2998Z"/><path d="M18 7.2998C19.1046 7.2998 20 8.19524 20 9.2998C20 10.4044 19.1046 11.2998 18 11.2998C16.8954 11.2998 16 10.4044 16 9.2998C16 8.19524 16.8954 7.2998 18 7.2998Z"/><path d="M6 2C7.10457 2 8 2.89543 8 4C8 5.10457 7.10457 6 6 6C4.89543 6 4 5.10457 4 4C4 2.89543 4.89543 2 6 2Z"/><path d="M12 2C13.1046 2 14 2.89543 14 4C14 5.10457 13.1046 6 12 6C10.8954 6 10 5.10457 10 4C10 2.89543 10.8954 2 12 2Z"/><path d="M18 2C19.1046 2 20 2.89543 20 4C20 5.10457 19.1046 6 18 6C16.8954 6 16 5.10457 16 4C16 2.89543 16.8954 2 18 2Z"/></svg></span>
+        <span class="lbl">Manual entry (MOTO)</span>
+      </div>
+    </div>
+
   </div>
 </div>
 </div>
@@ -841,6 +965,67 @@
     at(7430, backspace);                                 // £0.05
     at(7760, backspace);                                 // £0.00 — exactly the initial state
     at(9300, cycle);                                     // seamless loop
+  }
+  cycle();
+})();
+
+// ── MOTO scene: select method beside Charge → manual card entry, typed in ──
+(function(){
+  var w=document.getElementById('mo1'); if(!w) return;
+  var chip=document.getElementById('moChip'), chipInner=document.getElementById('moChipInner'),
+      charge=document.getElementById('moCharge'), dim=document.getElementById('moDim'),
+      sheet=document.getElementById('moSheet'), optMoto=document.getElementById('moOptMoto'),
+      viewA=document.getElementById('moViewA'), viewB=document.getElementById('moViewB'),
+      fNum=document.getElementById('moFNum'), fExp=document.getElementById('moFExp'), fCvv=document.getElementById('moFCvv'),
+      numTxt=document.getElementById('moNumTxt'), expTxt=document.getElementById('moExpTxt'),
+      cvvTxt=document.getElementById('moCvvTxt'), mc=document.getElementById('moMc'),
+      bCharge=document.getElementById('moBCharge');
+  var CARD_HTML=chipInner.innerHTML;
+  var MOTO_HTML=document.querySelector('#moOptMoto .ic svg').outerHTML+'MOTO';
+  var NUM='9876 6543 3219 1234', EXP='12 / 28', CVV='876';
+  var timers=[];
+  function at(ms,fn){ timers.push(setTimeout(fn,ms)); }
+  function press(el,ms){ el.classList.add('pressed'); setTimeout(function(){ el.classList.remove('pressed'); }, ms||200); }
+  function swapChip(html){
+    chipInner.classList.add('fade');
+    setTimeout(function(){ chipInner.innerHTML=html; chipInner.classList.remove('fade'); },180);
+  }
+  function reset(){
+    timers.forEach(clearTimeout); timers=[];
+    chipInner.style.transition='none'; chipInner.classList.remove('fade');
+    chipInner.innerHTML=CARD_HTML; void chipInner.offsetWidth; chipInner.style.transition='';
+    viewA.classList.remove('away'); viewB.classList.remove('on');
+    sheet.classList.remove('on'); dim.classList.remove('on'); optMoto.classList.remove('sel');
+    [fNum,fExp,fCvv].forEach(function(f){ f.classList.remove('focus'); });
+    numTxt.textContent=''; expTxt.textContent=''; cvvTxt.textContent='';
+    mc.classList.remove('on');
+  }
+  function cycle(){
+    reset();
+    at(900,  function(){ press(chip,220); });               // pick a method…
+    at(1080, function(){ dim.classList.add('on'); sheet.classList.add('on'); });
+    at(2300, function(){ press(optMoto,240); optMoto.classList.add('sel'); });   // MOTO selected
+    at(3100, function(){ sheet.classList.remove('on'); dim.classList.remove('on'); });
+    at(3350, function(){ swapChip(MOTO_HTML); });           // chip now reflects MOTO
+    at(4200, function(){ press(charge,240); });             // Charge → manual entry
+    at(4500, function(){ viewA.classList.add('away'); viewB.classList.add('on'); });
+    at(5150, function(){ fNum.classList.add('focus'); });
+    (function(){                                            // card number, digit by digit
+      for(var i=1;i<=NUM.length;i++)(function(i){ at(5300+i*90, function(){ numTxt.textContent=NUM.slice(0,i); }); })(i);
+    })();
+    at(5300+5*90+60, function(){ mc.classList.add('on'); });   // Mastercard recognised after "9876 "
+    at(7250, function(){ fNum.classList.remove('focus'); fExp.classList.add('focus'); });
+    (function(){
+      for(var i=1;i<=EXP.length;i++)(function(i){ at(7400+i*90, function(){ expTxt.textContent=EXP.slice(0,i); }); })(i);
+    })();
+    at(8250, function(){ fExp.classList.remove('focus'); fCvv.classList.add('focus'); });
+    (function(){
+      for(var i=1;i<=CVV.length;i++)(function(i){ at(8400+i*110, function(){ cvvTxt.textContent=CVV.slice(0,i); }); })(i);
+    })();
+    at(9000, function(){ fCvv.classList.remove('focus'); });
+    at(9350, function(){ press(bCharge,240); });            // proceed…
+    at(9700, function(){ viewB.classList.remove('on'); viewA.classList.remove('away'); });   // …back to start
+    at(11200, cycle);
   }
   cycle();
 })();
