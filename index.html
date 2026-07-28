@@ -208,9 +208,11 @@
   .tswap.in{ transition:opacity .3s cubic-bezier(.2,0,0,1), transform .3s cubic-bezier(.2,0,0,1), filter .3s cubic-bezier(.2,0,0,1);
     opacity:1; transform:translateY(0); filter:blur(0); }
   .tip-pad{ margin-top:auto; display:grid; grid-template-columns:repeat(3,1fr); gap:4px 8px; }
-  .tip-key{ height:42px; border:none; background:transparent; border-radius:12px; font:inherit; font-size:20px;
+  .tip-key{ width:60px; height:42px; justify-self:center; border:none; background:transparent;
+    border-radius:99px; font:inherit; font-size:20px;
     color:#807e79; font-variant-numeric:tabular-nums; display:flex; align-items:center; justify-content:center;
     cursor:pointer; transition:transform .12s ease, background .12s ease; }
+    /* fixed-width keys (like the prototype's circles) — the press highlight hugs the key */
   .tip-key.pressed{ transform:scale(.9); background:rgba(95,79,48,.08); }
   .tip-key.del{ color:#e7000b; }
   .tip-key.del svg{ width:22px; height:22px; }
